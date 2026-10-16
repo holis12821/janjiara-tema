@@ -8,7 +8,7 @@ Gambar thumbnail katalog tema undangan digital **JANJIARA** (WebP 600×600), dip
 https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/tema/SLUG.webp
 ```
 
-Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/tema/adat-jawa.webp
+Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/adat-jawa.webp
 
 - `SLUG` = nama file tema, huruf kecil, tanda hubung tetap (sama dengan slug preview `https://janjiaradigital.webinvit.id/preview/SLUG`).
 - `VERSI` = tag rilis (mis. `v1.0.0`). Link dengan tag di-cache permanen oleh jsDelivr, jadi cepat dan stabil.
