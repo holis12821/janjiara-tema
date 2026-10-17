@@ -9,6 +9,30 @@ Sesuaikan perilaku checkout JANJIARA berdasarkan status fitur **Checkout Otomati
 - Jangan mengarahkan pelanggan ke landing page bawaan Satu Momen.
 - Setelah pelanggan memilih tema, lanjutkan workflow existing.
 
+## 1b. Batas penerapan — dua skenario yang berbeda
+
+Dokumen ini mencampur dua hal yang penanganannya ada di tempat berbeda.
+Bedakan dulu agar tidak saling menimpa:
+
+| | Skenario A — sisi platform | Skenario B — sisi landing page |
+|---|---|---|
+| Pemicu | Pelanggan membuka `/portal/checkout/<id>` langsung | Pelanggan menekan tombol pesan di landing page JANJIARA |
+| Dikendalikan oleh | Satu Momen (server) | `JJ_CHECKOUT` di `janjiara-landing-page.html` |
+| Bagian 4, 5, 7 dokumen ini | berlaku | tidak berlaku |
+
+**Skenario A tidak bisa dikerjakan dari landing page.** Landing page JANJIARA
+adalah satu berkas HTML statis; ia tidak bisa mencegat permintaan ke
+`janjiaraundangan.webinvit.id/portal/checkout/...`. Pseudocode `handleCheckout(request)`
+di Bagian 7 adalah kode sisi server, jadi hanya Satu Momen yang bisa menerapkannya.
+
+**Keputusan untuk Skenario B (17 Okt 2026):** saat Checkout Otomatis nonaktif,
+tombol pesan di landing page diarahkan ke **WhatsApp admin JANJIARA**, bukan ke
+halaman daftar tema. Ini keputusan pemilik, menggantikan Bagian 4B untuk
+landing page. Bagian 4B tetap berlaku sebagai spesifikasi untuk Skenario A.
+
+Akibatnya: slug `/shop` untuk Janji dan Cerita **tidak diperlukan** untuk
+implementasi landing page saat ini.
+
 ## 2. URL Referensi
 
 ### Halaman daftar tema paket Purnama
@@ -20,6 +44,8 @@ URL ini merupakan contoh halaman daftar tema paket Purnama. Parameter `theme=Foh
 ### URL checkout otomatis
 
 `https://janjiaraundangan.webinvit.id/portal/checkout/3488`
+
+Format yang terpakai di kode: `/portal/checkout/{id}` — path, bukan query string.
 
 URL ini merupakan contoh endpoint checkout otomatis. Jika fitur checkout otomatis nonaktif, jangan tampilkan error atau mengarahkan pelanggan ke landing page bawaan Satu Momen. Arahkan pelanggan ke daftar tema untuk paket yang sesuai.
 
