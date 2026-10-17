@@ -19,6 +19,41 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/adat-jawa
 2. Commit & push, lalu buat tag baru: `git tag v1.0.1 && git push origin v1.0.1`.
 3. Di HTML landing page, ubah `JJ_IMG_BASE` ke `@v1.0.1` dan tambah satu baris di `JJ_TEMA`.
 
+## Video ucapan
+
+Folder `video/` berisi contoh video ucapan (MP4 H.264, vertikal 9:16, 540x960) beserta
+poster thumbnail-nya di `video/poster/` (WebP 540x960).
+
+```
+Video  : https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/video/SLUG.mp4
+Poster : https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/video/poster/SLUG.webp
+```
+
+Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-tahun-baru-001.mp4
+
+| Slug | Kategori |
+|---|---|
+| `natal-tahun-baru-001` … `-004` | Natal |
+| `natal-tahun-baru-005`, `-006` | Tahun Baru |
+
+### Menambah video baru
+
+1. Kompres dulu ke 540x960 — **jsDelivr menolak file di atas 20 MB**, jadi video mentah
+   1080x1920 (26-42 MB) tidak akan tersaji. Perintah yang dipakai:
+
+   ```sh
+   ffmpeg -i asli.mp4 -vf "scale=540:-2:flags=lanczos" -c:v libx264 -profile:v high \
+     -preset slow -crf 26 -maxrate 2000k -bufsize 4000k -pix_fmt yuv420p \
+     -c:a aac -b:a 96k -movflags +faststart video/slug.mp4
+
+   ffmpeg -ss 6 -i asli.mp4 -frames:v 1 -vf "scale=540:-2:flags=lanczos" /tmp/f.png
+   cwebp -q 82 -m 6 /tmp/f.png -o video/poster/slug.webp
+   ```
+
+2. Commit & push.
+3. Di `janjiara-landing-page.html`, tambah satu baris di `JJ_VIDEO`
+   (cari komentar "KATALOG VIDEO UCAPAN").
+
 ## Favicon JANJIARA
 
 Folder `brand/favicon/` berisi ikon tab browser (monogram JA):

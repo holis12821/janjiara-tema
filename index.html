@@ -4,8 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>JANJIARA — Undangan Digital Pernikahan, Aqiqah, Khitan &amp; Ulang Tahun</title>
+  <script>window.JJ_TITLE = document.title;</script>
   <meta name="description" content="JANJIARA membuat undangan digital yang elegan dan personal untuk pernikahan, ulang tahun anak, khitanan, aqiqah &amp; tasmiyah, hingga syukuran. Lengkap dengan RSVP, peta, galeri, dan amplop digital.">
   <meta name="theme-color" content="#59664A">
+  <!-- Verifikasi kepemilikan domain di Google Search Console — jangan dihapus. -->
+  <meta name="google-site-verification" content="7JlvSq88SyWrVjRl1fPwi1HLHHbU_uicEqHRgtWG29s" />
   <meta property="og:title" content="JANJIARA — Setiap Janji, Punya Cerita.">
   <meta property="og:description" content="Undangan digital elegan untuk setiap momen berharga keluarga Indonesia.">
   <meta property="og:type" content="website">
@@ -796,6 +799,65 @@ body.has-picker { overflow: hidden; }
   .pkg-picker { place-items: end center; padding: 0; }
   .pkg-picker__panel { width: 100%; border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 24px 18px 28px; max-height: 88vh; }
 }
+/* ---------- 28. Katalog Video Ucapan (v6) ---------- */
+body.is-video main#utama { display: none; }
+.vplayer[hidden] { display: none !important; }
+.vcat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 22px; }
+.video-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius);
+  overflow: hidden; box-shadow: var(--shadow-sm); transition: transform .3s var(--ease), box-shadow .3s var(--ease); }
+.video-card:hover { transform: translateY(-6px); box-shadow: var(--shadow); }
+.video-card__media { position: relative; display: block; width: 100%; padding: 0; border: 0; cursor: pointer;
+  aspect-ratio: 9 / 16; background: linear-gradient(160deg, var(--olive-200), var(--neutral-100)); overflow: hidden; }
+.video-card__media img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform .5s var(--ease); }
+.video-card:hover .video-card__media img { transform: scale(1.04); }
+.video-card__play { position: absolute; inset: 0; display: grid; place-items: center;
+  background: linear-gradient(180deg, rgba(41,42,38,.08) 40%, rgba(41,42,38,.5)); transition: background .3s var(--ease); }
+.video-card__media:hover .video-card__play, .video-card__media:focus-visible .video-card__play { background: rgba(41,42,38,.42); }
+.video-card__play span { width: 54px; height: 54px; border-radius: 50%; background: rgba(255,253,249,.92);
+  color: var(--olive-800); display: grid; place-items: center; box-shadow: var(--shadow-sm); transition: transform .3s var(--ease); }
+.video-card__media:hover .video-card__play span { transform: scale(1.08); }
+.video-card__play svg { width: 22px; height: 22px; margin-left: 3px; }
+.video-card__dur { position: absolute; bottom: 10px; right: 10px; padding: 3px 9px; border-radius: 999px;
+  background: rgba(41,42,38,.72); color: var(--neutral-50); font-size: .72rem; letter-spacing: .03em; }
+.video-card__body { padding: 16px 18px 20px; }
+.video-card__top { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; margin-bottom: 12px; }
+.video-card__body h3 { font-size: 1.18rem; line-height: 1.2; margin: 0; }
+.video-card__actions { display: grid; gap: 8px; }
+.video-card__actions .btn { min-height: 40px; padding: 8px 12px; font-size: .88rem; }
+.vplayer { position: fixed; inset: 0; z-index: 210; display: grid; place-items: center; padding: 16px; }
+.vplayer__backdrop { position: absolute; inset: 0; background: rgba(29,31,27,.74); }
+.vplayer__panel { position: relative; width: min(100%, 880px); max-height: calc(100vh - 32px); overflow: auto;
+  background: var(--bg-surface); border-radius: var(--radius-lg); padding: 20px; box-shadow: var(--shadow-lg);
+  display: grid; grid-template-columns: minmax(0, 260px) 1fr; gap: 24px; align-items: start; }
+.vplayer__close { position: absolute; top: 12px; right: 12px; z-index: 2; width: 40px; height: 40px; border-radius: 50%;
+  border: 1px solid var(--border); background: var(--bg-page); color: var(--text-primary); display: grid; place-items: center; cursor: pointer; }
+.vplayer__close svg { width: 18px; height: 18px; }
+.vplayer__stage { background: var(--neutral-950); border-radius: var(--radius); overflow: hidden; }
+.vplayer__stage video { display: block; width: 100%; aspect-ratio: 9 / 16; background: var(--neutral-950); }
+.vplayer__meta { padding: 8px 40px 8px 0; }
+.vplayer__meta h2 { font-size: 1.7rem; margin: 4px 0 10px; }
+.vplayer__meta p { font-size: .92rem; color: var(--text-muted); }
+.vplayer__specs { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 8px; font-size: .9rem; }
+.vplayer__specs li { display: flex; gap: 9px; align-items: center; color: var(--text-secondary); }
+.vplayer__specs svg { width: 16px; height: 16px; color: var(--olive-600); flex: none; }
+.vplayer__actions { display: grid; gap: 10px; }
+@media (max-width: 760px) {
+  .vplayer { place-items: end center; padding: 0; }
+  .vplayer__panel { width: 100%; grid-template-columns: 1fr; gap: 16px; max-height: 92vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0; padding: 18px 18px 24px; }
+  .vplayer__stage { width: min(100%, 240px); margin: 10px auto 0; }
+  .vplayer__meta { padding: 0; text-align: center; }
+  .vplayer__specs { justify-items: center; }
+  .vplayer__specs li { justify-content: center; }
+}
+@media (max-width: 600px) {
+  .vcat-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .video-card__body { padding: 12px 12px 14px; }
+  .video-card__body h3 { font-size: 1rem; }
+  .video-card__play span { width: 44px; height: 44px; }
+  .video-card__play svg { width: 18px; height: 18px; }
+  .video-card .tag { font-size: .66rem; padding: 3px 8px; }
+}
 </style>
 </head>
 <body>
@@ -823,6 +885,10 @@ body.has-picker { overflow: hidden; }
     <symbol id="i-map" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.1-7-11.4a7 7 0 0114 0C19 14.9 12 21 12 21z"/><circle cx="12" cy="9.6" r="2.5"/></symbol>
     <symbol id="i-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="8.5" cy="9.5" r="1.8"/><path d="M21 15.5l-5-5L6.5 20"/></symbol>
     <symbol id="i-music" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5.5l11-2v12.5"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></symbol>
+    
+    <symbol id="i-play-fill" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.2v13.6c0 .8.9 1.3 1.6.9l10.8-6.8a1 1 0 0 0 0-1.8L9.6 4.3A1 1 0 0 0 8 5.2z"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M7 4v16M17 4v16M3 12h18M3 8h4M3 16h4M17 8h4M17 16h4"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 5.5h3"/></symbol>
     <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></symbol>
     <symbol id="i-video" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="13.5" height="12" rx="2"/><path d="M16 10.2l5.5-3v9.6l-5.5-3"/></symbol>
     <symbol id="i-qr" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="14" y="3.5" width="6.5" height="6.5" rx="1"/><rect x="3.5" y="14" width="6.5" height="6.5" rx="1"/><path d="M14 14h3v3h-3zM20.5 14v.01M14 20.5h.01M17 20.5h3.5V17"/></symbol>
@@ -865,23 +931,22 @@ body.has-picker { overflow: hidden; }
       <svg viewBox="-15.84 -15.84 823.83 241.69" role="img" aria-hidden="true"><use href="#jj-logo-h"/></svg>
     </a>
     <!-- Menu navbar. Link Video / Musik / Masuk (Portal Pelanggan → /portal/login) mengarah ke halaman platform undangan JANJIARA
-         (https://janjiaradigital.webinvit.id). Bila halaman ini dihosting di domain tersebut, link tetap berfungsi. -->
+         (https://janjiaraundangan.webinvit.id). Bila halaman ini dihosting di domain tersebut, link tetap berfungsi. -->
     <nav aria-label="Navigasi utama">
       <div class="nav__menu" id="menu">
         <a href="#tema">Tema</a>
         <a href="#harga">Harga</a>
-        <a class="js-site" data-path="/video" href="https://janjiaradigital.webinvit.id/video">Video</a>
-        <a class="js-site" data-path="/music" href="https://janjiaradigital.webinvit.id/music">Musik</a>
+        <a href="#katalog-video">Video</a>
         <a href="#faq">FAQ</a>
         <a href="#kontak">Kontak</a>
         <div class="nav__mobile-actions">
-          <a class="btn btn--outline btn--block js-site" data-path="/portal/login" href="https://janjiaradigital.webinvit.id/portal/login" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk Portal Pelanggan</a>
+          <a class="btn btn--outline btn--block js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk Portal Pelanggan</a>
           <a class="btn btn--primary btn--block" href="#order">Form Order</a>
         </div>
       </div>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--outline btn--sm js-site" data-path="/portal/login" href="https://janjiaradigital.webinvit.id/portal/login" title="Portal Pelanggan" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk</a>
+      <a class="btn btn--outline btn--sm js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" title="Portal Pelanggan" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk</a>
       <a class="btn btn--primary btn--sm" href="#order">Form Order</a>
     </div>
     <button class="nav__toggle" type="button" aria-controls="menu" aria-expanded="false" aria-label="Buka menu"><span></span></button>
@@ -1039,8 +1104,8 @@ body.has-picker { overflow: hidden; }
 
          A) Lewat data JavaScript (DISARANKAN)
             Buka bagian <script> di bawah, cari "const THEMES = [", lalu tambahkan satu baris per tema:
-              { nama: "Fohoway", kategori: "wedding", gambar: "https://janjiaradigital.webinvit.id/themes/fohoway/fohoway.webp",
-                 preview: "https://janjiaradigital.webinvit.id/preview/fohoway", deskripsi: "Elegan dengan sentuhan floral", badge: "Terlaris" },
+              { nama: "Fohoway", kategori: "wedding", gambar: "https://janjiaraundangan.webinvit.id/themes/fohoway/fohoway.webp",
+                 preview: "https://janjiaraundangan.webinvit.id/preview/fohoway", deskripsi: "Elegan dengan sentuhan floral", badge: "Terlaris" },
             - kategori : wedding | kids | khitan | aqiqah | other   (sesuai tombol filter di atas)
             - gambar   : URL gambar thumbnail tema (rasio 4:5 atau persegi)
             - preview  : link demo/preview tema di platform
@@ -1184,6 +1249,21 @@ body.has-picker { overflow: hidden; }
     <div class="catalog-cta reveal"><a class="btn btn--primary" href="#katalog-tema">Lihat semua tema <span class="catalog-cta__count" data-tema-total></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
   </div>
 </section>
+
+<!-- ============================== VIDEO UCAPAN (teaser) ==============================
+     Kartu diisi otomatis dari data JJ_VIDEO (lihat script paling bawah). Katalog lengkap: #katalog-video -->
+<section class="section" id="video">
+  <div class="container">
+    <div class="section-head reveal">
+      <span class="eyebrow">Video Ucapan</span>
+      <h2>Kirim ucapan yang <span class="accent">tidak hanya dibaca.</span></h2>
+      <p>Video pendek berformat vertikal untuk Natal, Tahun Baru, dan momen spesial lainnya. Nama, foto, dan kalimatnya kami sesuaikan dengan Anda — tinggal bagikan ke WhatsApp atau Instagram Story.</p>
+    </div>
+    <div class="vcat-grid" id="video-teaser"></div>
+    <div class="catalog-cta reveal"><a class="btn btn--primary" href="#katalog-video">Lihat semua video ucapan <span class="catalog-cta__count" data-video-total></span><svg aria-hidden="true"><use href="#i-arrow"/></svg></a></div>
+  </div>
+</section>
+
 
 <!-- ============================== FITUR ============================== -->
 <section class="section section--subtle" id="fitur">
@@ -1628,7 +1708,7 @@ body.has-picker { overflow: hidden; }
      DATA TEMA ada di <script>, cari "const JJ_TEMA = [" — satu baris per tema: ["slug", "kategori", "sub-kategori"]
        - slug     : nama file gambar TANPA .jpg, huruf kecil, tanda hubung tetap (contoh: adat-jawa)
                     -> gambar  : tema/adat-jawa.webp
-                    -> preview : https://janjiaradigital.webinvit.id/preview/adat-jawa
+                    -> preview : https://janjiaraundangan.webinvit.id/preview/adat-jawa
                     -> nama    : "Adat Jawa" (otomatis: huruf depan tiap kata besar)
        - kategori : wedding | kids | khitan | aqiqah | other (sama dengan filter landing page)
      MENAMBAH TEMA BARU: (1) upload slug.webp ke hosting gambar (lihat JJ_IMG_BASE), (2) tambah satu baris di JJ_TEMA. -->
@@ -1661,6 +1741,68 @@ body.has-picker { overflow: hidden; }
       <div class="catalog-more"><button class="btn btn--outline" type="button" id="catalog-more" hidden>Muat lebih banyak</button></div>
     </div>
   </section>
+</div>
+
+
+<!-- ============================== HALAMAN KATALOG VIDEO UCAPAN ==============================
+     Tampil saat alamat berakhiran #katalog-video (opsional: #katalog-video?kategori=natal).
+     DATA VIDEO ada di <script> paling bawah, cari "const JJ_VIDEO = [" — satu baris per video:
+       ["slug", "kategori", "Nama Tampilan", "0:30"]
+       - slug     : nama file TANPA .mp4, huruf kecil, tanda hubung tetap (contoh: natal-tahun-baru-001)
+                    -> video  : <JJ_VIDEO_CFG.cdnBase>natal-tahun-baru-001.mp4
+                    -> poster : <JJ_VIDEO_CFG.posterBase>natal-tahun-baru-001.webp
+       - kategori : kunci dari JJ_VIDEO_KAT (natal | tahun-baru | lebaran | wedding | kids | khitan | aqiqah | lain)
+       - nama     : opsional. Dikosongkan ("") = nama otomatis dari slug.
+       - durasi   : opsional. Dikosongkan = pakai JJ_VIDEO_CFG.durasi.
+     MENAMBAH VIDEO BARU: (1) upload slug.mp4 ke repo janjiara-tema folder video/ dan slug.webp ke video/poster/,
+     (2) tambah satu baris di JJ_VIDEO. -->
+<div class="catalog-page" id="katalog-video" hidden>
+  <section class="order-hero">
+    <div class="container">
+      <a class="order-back" href="#video"><svg aria-hidden="true"><use href="#i-arrow"/></svg>Kembali ke beranda</a>
+      <span class="eyebrow">Katalog Video Ucapan</span>
+      <h1>Ucapan yang <span class="accent">bergerak dan bersuara.</span></h1>
+      <p>Video ucapan siap pakai untuk Natal, Tahun Baru, dan momen spesial lainnya — tinggal ganti nama, foto, dan pesan Anda. Putar dulu contohnya, lalu pesan lewat WhatsApp admin JANJIARA.</p>
+    </div>
+  </section>
+  <section class="order-body catalog-body">
+    <div class="container">
+      <div class="catalog-tools">
+        <div class="filters catalog-filters" role="group" aria-label="Filter kategori video" id="vcat-filters"></div>
+        <label class="field catalog-search"><span class="visually-hidden">Cari nama video</span>
+          <input type="search" id="vcat-q" placeholder="Cari nama video, mis. natal, tahun baru" autocomplete="off"></label>
+        <p class="catalog-count" id="vcat-count" aria-live="polite"></p>
+      </div>
+      <div class="vcat-grid" id="vcat-grid"></div>
+      <p class="catalog-empty" id="vcat-empty" hidden>Video tidak ditemukan. Coba kata lain, atau <a href="#" class="js-video-wa">tanya admin via WhatsApp</a>.</p>
+      <div class="catalog-more"><button class="btn btn--outline" type="button" id="vcat-more" hidden>Muat lebih banyak</button></div>
+    </div>
+  </section>
+</div>
+
+<!-- Pemutar video (dipakai halaman Katalog Video dan kartu video di landing page) -->
+<div class="vplayer" id="vplayer" hidden>
+  <div class="vplayer__backdrop" data-close></div>
+  <div class="vplayer__panel" role="dialog" aria-modal="true" aria-labelledby="vplayer-title">
+    <button class="vplayer__close" type="button" data-close aria-label="Tutup"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+    <div class="vplayer__stage">
+      <video id="vplayer-video" controls playsinline preload="none"></video>
+    </div>
+    <div class="vplayer__meta">
+      <span class="eyebrow">Video Ucapan</span>
+      <h2 id="vplayer-title">Nama Video</h2>
+      <ul class="vplayer__specs">
+        <li><svg aria-hidden="true"><use href="#i-film"/></svg><span id="vplayer-kat">—</span></li>
+        <li><svg aria-hidden="true"><use href="#i-clock"/></svg><span id="vplayer-dur">—</span></li>
+        <li><svg aria-hidden="true"><use href="#i-phone"/></svg>Format vertikal 9:16, siap dibagikan ke WhatsApp &amp; Instagram Story</li>
+      </ul>
+      <p>Nama, foto, dan kalimat ucapan diganti sesuai permintaan Anda. Kirim datanya ke admin, video jadi dikirim dalam bentuk file siap bagikan.</p>
+      <div class="vplayer__actions">
+        <a class="btn btn--primary" id="vplayer-wa" href="#" target="_blank" rel="noopener"><svg aria-hidden="true"><use href="#i-message"/></svg>Pesan video ini</a>
+        <a class="btn btn--outline" id="vplayer-form" href="#order">atau isi Form Order lengkap</a>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Pemilih paket (dipakai halaman Katalog Tema dan kartu tema di landing page) -->
@@ -1703,6 +1845,7 @@ body.has-picker { overflow: hidden; }
         <h4>Jelajahi</h4>
         <ul>
           <li><a href="#tema">Katalog Tema</a></li>
+          <li><a href="#katalog-video">Video Ucapan</a></li>
           <li><a href="#fitur">Fitur</a></li>
           <li><a href="#harga">Harga</a></li>
           <li><a href="#cara-pesan">Cara Pesan</a></li>
@@ -1779,8 +1922,8 @@ const JANJIARA = {
   // Kiriman PERTAMA akan memicu email aktivasi ke alamat di atas — klik "Activate" sekali saja.
   formEndpoint: "https://formsubmit.co/ajax/janjiara.digital@gmail.com",
   instagram: "https://www.instagram.com/janjiara.digital?vrfl=dTdtenM5bnc1ZXQw&utm_source=qr",
-  // Domain platform undangan (portal pelanggan /portal/login, video, musik, preview tema)
-  siteUrl: "https://janjiaradigital.webinvit.id"
+  // Domain platform undangan (portal pelanggan /portal/login & preview tema). Katalog video ucapan ada di halaman ini (#katalog-video).
+  siteUrl: "https://janjiaraundangan.webinvit.id"
 };
 
 /* =====================================================================
@@ -1804,8 +1947,8 @@ const THEMES = [
   { nama: "Tosca Green", kategori: "aqiqah", gambar: temaImg("tosca-green"), preview: SITE_PREVIEW + "tosca-green", deskripsi: "", badge: "" },
   { nama: "Halal Bihalal", kategori: "other", gambar: temaImg("halal-bihalal"), preview: SITE_PREVIEW + "halal-bihalal", deskripsi: "", badge: "" },
   { nama: "Graduation Ceremony", kategori: "other", gambar: temaImg("graduation-ceremony"), preview: SITE_PREVIEW + "graduation-ceremony", deskripsi: "", badge: "" },
-  // { nama: "Fohoway", kategori: "wedding", gambar: "https://janjiaradigital.webinvit.id/themes/fohoway/fohoway.webp", preview: "https://janjiaradigital.webinvit.id/preview/fohoway", deskripsi: "Elegan dan lembut untuk hari bahagia.", badge: "Terlaris" },
-  // { nama: "Cream Flowers", kategori: "wedding", gambar: "https://janjiaradigital.webinvit.id/themes/cream-flowers/cream-flowers.webp", preview: "https://janjiaradigital.webinvit.id/preview/cream-flowers", deskripsi: "Nuansa krem dengan bunga halus.", badge: "" },
+  // { nama: "Fohoway", kategori: "wedding", gambar: "https://janjiaraundangan.webinvit.id/themes/fohoway/fohoway.webp", preview: "https://janjiaraundangan.webinvit.id/preview/fohoway", deskripsi: "Elegan dan lembut untuk hari bahagia.", badge: "Terlaris" },
+  // { nama: "Cream Flowers", kategori: "wedding", gambar: "https://janjiaraundangan.webinvit.id/themes/cream-flowers/cream-flowers.webp", preview: "https://janjiaraundangan.webinvit.id/preview/cream-flowers", deskripsi: "Nuansa krem dengan bunga halus.", badge: "" },
 ];
 
 /* Harga paket untuk ringkasan Form Order — ubah bila harga berganti */
@@ -1938,7 +2081,7 @@ function waLink(text) {
     links.forEach(function (l) { const s = document.querySelector(l.getAttribute("href")); if (s) spy.observe(s); });
   }
 
-  /* Platform links (Masuk, Video, Musik) */
+  /* Platform links (tombol Masuk → Portal Pelanggan) */
   document.querySelectorAll(".js-site").forEach(function (a) { a.href = JANJIARA.siteUrl + a.dataset.path; });
 
   /* Theme catalog from THEMES data (replaces sample cards when filled) */
@@ -2686,7 +2829,7 @@ const JJ_TEMA = [
 
   /* ---------- Routing #katalog-tema (berjalan setelah routing lama) ---------- */
   let rendered = false;
-  const BASE_TITLE = document.title.indexOf("Form Order") === 0 ? "" : document.title;
+  const BASE_TITLE = window.JJ_TITLE || "";
   function catalogRoute(fromLoad) {
     const on = location.hash.indexOf("#katalog-tema") === 0;
     const was = document.body.classList.contains("is-catalog");
@@ -2707,6 +2850,204 @@ const JJ_TEMA = [
   }
   window.addEventListener("hashchange", function () { catalogRoute(false); });
   catalogRoute(true);
+})();
+</script>
+<script>
+/* =====================================================================
+   KATALOG VIDEO UCAPAN (v6) — blok terpisah, logika katalog tema tidak diubah.
+   File video & poster di-host di repo GitHub holis12821/janjiara-tema dan
+   disajikan lewat jsDelivr CDN.
+
+   Format pesan WhatsApp:
+     Halo Admin JANJIARA
+     Saya mau order Video Ucapan *Merry Christmas Pastel*
+   ===================================================================== */
+const JJ_VIDEO_CFG = {
+  /* GitHub Pages: file video diambil dari repo ini sendiri, bukan jsDelivr —
+     halaman tetap jalan walau CDN atau server webinvit sedang gangguan. */
+  cdnBase:    "video/",
+  posterBase: "video/poster/",
+  durasi:     "0:30",   // durasi default bila tidak diisi per baris
+  pageSize:   12,       // jumlah kartu per "Muat lebih banyak"
+  teaser:     4         // jumlah kartu di seksi Video Ucapan pada landing page
+};
+/* Kategori video. Tambah baris baru bila ada jenis ucapan baru — chip filter
+   hanya muncul untuk kategori yang sudah punya video. */
+const JJ_VIDEO_KAT = {
+  "natal":      { label: "Natal",        tag: "tag--khitan" },
+  "tahun-baru": { label: "Tahun Baru",   tag: "tag--other"  },
+  "lebaran":    { label: "Idulfitri",    tag: "tag--aqiqah" },
+  "wedding":    { label: "Pernikahan",   tag: "tag--wedding" },
+  "kids":       { label: "Ulang Tahun",  tag: "tag--kids"   },
+  "lain":       { label: "Ucapan Lain",  tag: "tag--other"  }
+};
+/* Data video: ["slug", "kategori", "Nama Tampilan (opsional)", "durasi (opsional)"]
+   slug = nama file tanpa .mp4 -> video: <cdnBase>slug.mp4 · poster: <posterBase>slug.webp */
+const JJ_VIDEO = [
+  ["natal-tahun-baru-001", "natal",      "Merry Christmas Pastel",  ""],
+  ["natal-tahun-baru-002", "natal",      "Merry Christmas Klasik",  ""],
+  ["natal-tahun-baru-003", "natal",      "Natal Pohon Cemara",      ""],
+  ["natal-tahun-baru-004", "natal",      "Natal Salam Pribadi",     ""],
+  ["natal-tahun-baru-005", "tahun-baru", "Tahun Baru Silver",       ""],
+  ["natal-tahun-baru-006", "tahun-baru", "Countdown Tahun Baru",    ""]
+];
+
+(function () {
+  const CFG = JJ_VIDEO_CFG, KAT = JJ_VIDEO_KAT;
+  const esc = function (s) { return String(s || "").replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); };
+  const toName = function (slug) { return slug.split("-").map(function (w) { return w.charAt(0).toUpperCase() + w.slice(1); }).join(" "); };
+
+  const videos = JJ_VIDEO.map(function (r) {
+    const kat = KAT[r[1]] ? r[1] : "lain";
+    return { slug: r[0], cat: kat, name: r[2] || toName(r[0]), dur: r[3] || CFG.durasi,
+             src: CFG.cdnBase + r[0] + ".mp4", poster: CFG.posterBase + r[0] + ".webp" };
+  });
+  const bySlug = {}; videos.forEach(function (v) { bySlug[v.slug] = v; });
+
+  function waMessage(v) {
+    return "Halo " + JJ_CATALOG.adminName + "\nSaya mau order Video Ucapan *" + v.name + "*";
+  }
+
+  /* ---------- Pemutar video ---------- */
+  const player = document.getElementById("vplayer");
+  const media = document.getElementById("vplayer-video");
+  let lastFocus = null;
+  function openPlayer(v) {
+    lastFocus = document.activeElement;
+    document.getElementById("vplayer-title").textContent = v.name;
+    document.getElementById("vplayer-kat").textContent = "Ucapan " + (KAT[v.cat] ? KAT[v.cat].label : "Spesial");
+    document.getElementById("vplayer-dur").textContent = "Durasi " + v.dur + " (menit:detik)";
+    document.getElementById("vplayer-wa").href = waLink(waMessage(v));
+    media.poster = v.poster;
+    media.src = v.src;          /* src baru dipasang saat dibuka: nol bandwidth sebelum diklik */
+    player.hidden = false; document.body.classList.add("has-picker");
+    player.querySelector(".vplayer__close").focus();
+    const play = media.play(); if (play && play.catch) play.catch(function () { /* autoplay diblokir: tombol play bawaan tetap ada */ });
+  }
+  function closePlayer() {
+    if (player.hidden) return;
+    media.pause(); media.removeAttribute("src"); media.load();
+    player.hidden = true; document.body.classList.remove("has-picker");
+    if (lastFocus && lastFocus.focus) lastFocus.focus();
+  }
+  player.addEventListener("click", function (e) {
+    if (e.target.closest("[data-close]")) closePlayer();
+    if (e.target.closest("#vplayer-wa, #vplayer-form")) setTimeout(closePlayer, 0);
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") closePlayer(); });
+
+  /* ---------- Kartu ---------- */
+  function card(v) {
+    const k = KAT[v.cat] || KAT.lain;
+    return '<article class="video-card" data-cat="' + esc(v.cat) + '">' +
+      '<button class="video-card__media" type="button" data-play="' + esc(v.slug) + '" aria-label="Putar video ' + esc(v.name) + '">' +
+        '<img src="' + esc(v.poster) + '" alt="" loading="lazy" width="540" height="960">' +
+        '<span class="video-card__play"><span><svg aria-hidden="true"><use href="#i-play-fill"/></svg></span></span>' +
+        '<span class="video-card__dur">' + esc(v.dur) + '</span>' +
+      '</button>' +
+      '<div class="video-card__body">' +
+        '<div class="video-card__top"><h3>' + esc(v.name) + '</h3><span class="tag ' + k.tag + '">' + esc(k.label) + '</span></div>' +
+        '<div class="video-card__actions">' +
+          '<a class="btn btn--primary btn--sm" href="' + esc(waLink(waMessage(v))) + '" target="_blank" rel="noopener">Pesan video ini</a>' +
+        '</div>' +
+      '</div></article>';
+  }
+  function bindPlay(root) {
+    root.addEventListener("click", function (e) {
+      const b = e.target.closest("[data-play]"); if (!b) return;
+      const v = bySlug[b.dataset.play]; if (v) openPlayer(v);
+    });
+  }
+
+  /* ---------- Seksi teaser di landing page ---------- */
+  const teaser = document.getElementById("video-teaser");
+  if (teaser) {
+    teaser.innerHTML = videos.slice(0, CFG.teaser).map(card).join("");
+    bindPlay(teaser);
+  }
+  document.querySelectorAll("[data-video-total]").forEach(function (el) { el.textContent = videos.length + " video"; });
+
+  /* ---------- Halaman katalog ---------- */
+  const page = document.getElementById("katalog-video");
+  const grid = document.getElementById("vcat-grid");
+  const more = document.getElementById("vcat-more");
+  const q = document.getElementById("vcat-q");
+  const countEl = document.getElementById("vcat-count");
+  const empty = document.getElementById("vcat-empty");
+  const filters = document.getElementById("vcat-filters");
+  let state = { cat: "all", q: "", shown: 0, list: [] };
+
+  /* Chip filter dibuat otomatis — hanya kategori yang punya video yang tampil. */
+  const counts = {}; videos.forEach(function (v) { counts[v.cat] = (counts[v.cat] || 0) + 1; });
+  const chips = [{ key: "all", label: "Semua", n: videos.length }].concat(
+    Object.keys(KAT).filter(function (k) { return counts[k]; })
+      .map(function (k) { return { key: k, label: KAT[k].label, n: counts[k] }; }));
+  filters.innerHTML = chips.map(function (c, i) {
+    return '<button class="catalog-chip" type="button" data-vfilter="' + esc(c.key) + '" aria-pressed="' + (i === 0) + '">' +
+      esc(c.label) + ' <span>' + c.n + '</span></button>';
+  }).join("");
+  const fbtns = filters.querySelectorAll("[data-vfilter]");
+
+  page.querySelectorAll(".js-video-wa").forEach(function (a) {
+    a.href = waLink("Halo " + JJ_CATALOG.adminName + "\nSaya mau tanya video ucapan");
+    a.target = "_blank"; a.rel = "noopener";
+  });
+
+  function render(reset) {
+    if (reset) {
+      const s = state.q.trim().toLowerCase();
+      state.list = videos.filter(function (v) {
+        return (state.cat === "all" || v.cat === state.cat) &&
+          (!s || v.name.toLowerCase().indexOf(s) > -1 || v.slug.indexOf(s.replace(/\s+/g, "-")) > -1 ||
+           (KAT[v.cat] && KAT[v.cat].label.toLowerCase().indexOf(s) > -1));
+      });
+      state.shown = 0; grid.innerHTML = "";
+    }
+    const next = state.list.slice(state.shown, state.shown + CFG.pageSize);
+    grid.insertAdjacentHTML("beforeend", next.map(card).join(""));
+    state.shown += next.length;
+    more.hidden = state.shown >= state.list.length;
+    empty.hidden = state.list.length > 0;
+    countEl.textContent = state.list.length ? "Menampilkan " + state.shown + " dari " + state.list.length + " video" : "";
+  }
+  function setCat(c) {
+    state.cat = c;
+    fbtns.forEach(function (b) { b.setAttribute("aria-pressed", String(b.dataset.vfilter === c)); });
+    render(true);
+  }
+  fbtns.forEach(function (b) { b.addEventListener("click", function () { setCat(b.dataset.vfilter); }); });
+  let qt; q.addEventListener("input", function () { clearTimeout(qt); qt = setTimeout(function () { state.q = q.value; render(true); }, 150); });
+  more.addEventListener("click", function () { render(false); });
+  bindPlay(grid);
+
+  /* ---------- Routing #katalog-video (berjalan paling akhir) ---------- */
+  let rendered = false;
+  const BASE_TITLE = window.JJ_TITLE || "";
+  function videoRoute(fromLoad) {
+    const on = location.hash.indexOf("#katalog-video") === 0;
+    const was = document.body.classList.contains("is-video");
+    closePlayer();
+    document.body.classList.toggle("is-video", on);
+    page.hidden = !on;
+    if (on) {
+      const m = location.hash.match(/kategori=([a-z-]+)/);
+      if (!rendered || m) { rendered = true; setCat(m && KAT[m[1]] ? m[1] : state.cat); }
+      document.title = "Katalog Video Ucapan — JANJIARA";
+      if (!was || fromLoad) window.scrollTo({ top: 0, behavior: "instant" });
+    } else if (was) {
+      /* Halaman lain (#order / #katalog-tema) punya routing sendiri — jangan diganggu. */
+      const other = location.hash.indexOf("#order") === 0 || location.hash.indexOf("#katalog-tema") === 0;
+      if (other) return;
+      if (BASE_TITLE) document.title = BASE_TITLE;
+      const id = location.hash.slice(1).split("?")[0];
+      const el = id && id !== "top" ? document.getElementById(id) : null;
+      requestAnimationFrame(function () {
+        el ? el.scrollIntoView({ behavior: "instant" }) : window.scrollTo({ top: 0, behavior: "instant" });
+      });
+    }
+  }
+  window.addEventListener("hashchange", function () { videoRoute(false); });
+  videoRoute(true);
 })();
 </script>
 </body>
