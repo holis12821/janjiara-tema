@@ -1988,12 +1988,10 @@ const JJ_CHECKOUT = {
   /* Saklar utama. false = semua tombol ke WhatsApp admin. */
   aktif: false,
 
-  /* Format link checkout Satu Momen. Placeholder yang tersedia:
-       {id}     -> ID produk
-       {tema}   -> slug/nama tema atau video
-       {paket}  -> nama paket (Janji / Cerita / Purnama)
-     >>> PASTIKAN format ini sama persis dengan checkout Satu Momen. <<< */
-  urlTemplate: "https://janjiaraundangan.webinvit.id/checkout?produk={id}&tema={tema}",
+  /* Format link checkout Satu Momen. Sudah diverifikasi: membuka
+     /portal/checkout/3488 menampilkan halaman checkout Paket Purnama.
+     Placeholder: {id} = productId, {tema} = nama tema/slug video, {paket} = nama paket. */
+  urlTemplate: "https://janjiaraundangan.webinvit.id/portal/checkout/{id}",
 
   /* OPSIONAL — saklar jarak jauh. Diisi URL file JSON berisi:
          { "aktif": true }
@@ -2008,8 +2006,12 @@ const JJ_CHECKOUT = {
   /* ID produk dari dashboard Satu Momen. Kosong = tombol itu ke WhatsApp.
      Jadi bisa dinyalakan bertahap: isi satu ID, satu tombol pindah ke checkout. */
   produk: {
-    paket: { "Janji": "", "Cerita": "", "Purnama": "" },  /* undangan per paket */
-    video: { "_semua": "" }                                /* video ucapan; pakai slug utk harga beda */
+    /* productId dari dashboard Satu Momen. Diverifikasi 17 Okt 2026 lewat
+       /portal/checkout/<id> — nama paket, harga, dan masa aktifnya cocok
+       dengan konstanta PAKET di atas. Lihat JANJIARA_Checkout_Redirect_Product_ID.md.
+       CATATAN: productId TIDAK sama dengan angka pada slug /shop/paket-xxx-<angka>. */
+    paket: { "Janji": "3486", "Cerita": "3487", "Purnama": "3488" },
+    video: { "_semua": "" }   /* video ucapan belum punya produk di Satu Momen -> ke WhatsApp */
   }
 };
 
