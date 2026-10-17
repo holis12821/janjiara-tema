@@ -116,6 +116,15 @@ di tab baru sehingga landing page tetap terbuka bila pelanggan menemui masalah.
 di rincian produk. Jadi pilihan tema pelanggan tidak hilang saat masuk checkout.
 Format inilah yang dipakai `JJ_CHECKOUT.urlTemplate`.
 
+### Keputusan pemilik (18 Oktober 2026)
+
+**Checkout otomatis tidak jadi dipakai.** Seluruh pemesanan tetap lewat WhatsApp
+admin memakai template pesan yang baru. `JJ_CHECKOUT.aktif` diset `false`,
+sehingga seluruh jalur checkout pasif — tidak ada tombol yang menuju ke sana.
+
+Hasil verifikasi di dokumen ini tetap disimpan dan konfigurasinya sudah benar,
+jadi bila suatu saat mau dipakai cukup ubah `aktif` menjadi `true`.
+
 ### Perilaku saat ini (Checkout Otomatis NONAKTIF)
 
 Fitur Checkout Otomatis sedang **dimatikan** di dashboard reseller Satu Momen.

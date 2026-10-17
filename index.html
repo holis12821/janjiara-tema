@@ -2025,9 +2025,11 @@ function waPesan(isi) {
    ===================================================================== */
 const JJ_CHECKOUT = {
   /* Saklar utama. false = semua tombol ke WhatsApp admin.
-     Diaktifkan 18 Okt 2026: /portal/checkout/3486, /3487, /3488 terbukti
-     membuka halaman checkout yang berfungsi dan menampilkan tema yang dikirim. */
-  aktif: true,
+     DIMATIKAN atas keputusan pemilik (18 Okt 2026): checkout otomatis belum
+     dipakai, seluruh pemesanan tetap lewat WhatsApp admin.
+     Konfigurasi di bawah sudah terverifikasi dan tinggal dipakai bila suatu
+     saat diaktifkan — cukup ubah baris ini menjadi true. */
+  aktif: false,
 
   /* Format link checkout Satu Momen. Diverifikasi 18 Okt 2026:
      /portal/checkout/3488?theme=Adat%20Jawa  ->  halaman checkout Paket Purnama
