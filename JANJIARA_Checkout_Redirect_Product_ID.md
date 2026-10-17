@@ -84,6 +84,38 @@ dalamnya. Keduanya memakai penomoran yang berbeda dan tidak bisa saling diturunk
 Slug kedua paket itu harus diambil manual dari dashboard Satu Momen sebelum
 redirect daftar tema bisa diimplementasikan untuk semua paket.
 
+### Mengapa "cek dulu, kalau error baru ke WhatsApp" tidak bisa dilakukan browser
+
+Diuji 18 Oktober 2026. Halaman checkout Satu Momen adalah SPA:
+
+| URL | Status HTTP | Ukuran | Yang tampil setelah JS jalan |
+|---|---:|---:|---|
+| `/portal/checkout/3486` | 200 | 18591 b | Checkout Paket Janji |
+| `/portal/checkout/3487` | 200 | 18591 b | Checkout Paket Cerita |
+| `/portal/checkout/3488` | 200 | 18591 b | Checkout Paket Purnama |
+| `/portal/checkout/3485` | 200 | 18591 b | **404 ERROR** |
+| `/portal/checkout/9999` | 200 | 18591 b | **404 ERROR** |
+
+Server selalu menjawab **200 dengan kerangka HTML yang sama**, ID benar maupun
+ngawur. Halaman 404 baru digambar JavaScript setelah halaman terbuka. Ditambah:
+
+- Endpoint tidak mengirim header `Access-Control-Allow-Origin` → `fetch` lintas domain tidak bisa membaca hasilnya.
+- `X-Frame-Options: SAMEORIGIN` → tidak bisa diintip lewat iframe.
+
+Kesimpulan: landing page **tidak bisa memastikan sebuah ID valid sebelum
+membukanya**. Mengecek status HTTP pun percuma karena selalu 200.
+
+Maka pemeriksaan dilakukan atas hal yang memang bisa dipastikan di sisi landing page:
+`productId` harus terdaftar di `JJ_CHECKOUT.produk` dan berbentuk angka. Paket yang
+belum dipetakan atau ID salah bentuk langsung jatuh ke WhatsApp. Checkout juga dibuka
+di tab baru sehingga landing page tetap terbuka bila pelanggan menemui masalah.
+
+### Tema ikut terbawa ke checkout
+
+`/portal/checkout/3488?theme=Adat%20Jawa` menampilkan baris **"Tema: Adat Jawa"**
+di rincian produk. Jadi pilihan tema pelanggan tidak hilang saat masuk checkout.
+Format inilah yang dipakai `JJ_CHECKOUT.urlTemplate`.
+
 ### Perilaku saat ini (Checkout Otomatis NONAKTIF)
 
 Fitur Checkout Otomatis sedang **dimatikan** di dashboard reseller Satu Momen.

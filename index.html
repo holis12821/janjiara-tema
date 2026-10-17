@@ -2024,13 +2024,17 @@ function waPesan(isi) {
    CEK KAPAN SAJA: buka Console browser, ketik  JJ.checkout()
    ===================================================================== */
 const JJ_CHECKOUT = {
-  /* Saklar utama. false = semua tombol ke WhatsApp admin. */
-  aktif: false,
+  /* Saklar utama. false = semua tombol ke WhatsApp admin.
+     Diaktifkan 18 Okt 2026: /portal/checkout/3486, /3487, /3488 terbukti
+     membuka halaman checkout yang berfungsi dan menampilkan tema yang dikirim. */
+  aktif: true,
 
-  /* Format link checkout Satu Momen. Sudah diverifikasi: membuka
-     /portal/checkout/3488 menampilkan halaman checkout Paket Purnama.
-     Placeholder: {id} = productId, {tema} = nama tema/slug video, {paket} = nama paket. */
-  urlTemplate: "https://janjiaraundangan.webinvit.id/portal/checkout/{id}",
+  /* Format link checkout Satu Momen. Diverifikasi 18 Okt 2026:
+     /portal/checkout/3488?theme=Adat%20Jawa  ->  halaman checkout Paket Purnama
+     dengan baris "Tema: Adat Jawa" ikut tampil. Jadi tema TIDAK hilang.
+     Placeholder: {id} = productId, {tema} = nama tema, {paket} = nama paket.
+     Bila {tema} kosong, bagian "?theme=" dibuang otomatis. */
+  urlTemplate: "https://janjiaraundangan.webinvit.id/portal/checkout/{id}?theme={tema}",
 
   /* OPSIONAL — saklar jarak jauh. Diisi URL file JSON berisi:
          { "aktif": true }
@@ -2060,13 +2064,33 @@ function jjProdukId(ctx) {
   if (ctx.jenis === "video") return (P.video && (P.video[ctx.tema] || P.video._semua)) || "";
   return (P.paket && P.paket[ctx.paket]) || "";
 }
+/* Tujuan akhir satu tombol pesan.
+
+   CATATAN PENTING soal "cek dulu, kalau error baru ke WhatsApp":
+   halaman checkout Satu Momen adalah SPA. Server SELALU menjawab HTTP 200
+   dengan kerangka HTML yang sama — ID yang benar maupun ngawur. Halaman
+   "404" baru digambar JavaScript setelah halaman terbuka. Ditambah endpoint
+   itu tidak mengirim header CORS dan memakai X-Frame-Options: SAMEORIGIN.
+   Akibatnya browser TIDAK BISA memeriksa dulu apakah sebuah ID valid
+   sebelum membukanya — tidak lewat fetch, tidak lewat iframe.
+
+   Maka pemeriksaan dilakukan atas apa yang memang bisa dipastikan di sini:
+   paket harus punya productId yang terdaftar dan berbentuk angka. Paket baru
+   yang belum dipetakan, atau ID yang salah bentuk, langsung jatuh ke
+   WhatsApp — bukan dikirim ke halaman checkout yang mungkin 404.
+   Checkout juga dibuka di tab baru, jadi landing page tetap terbuka dan
+   tombol WhatsApp masih bisa dipakai bila pelanggan menemui masalah.      */
 function jjOrderTarget(ctx) {
   const id = jjProdukId(ctx);
-  if (!JJ_CHECKOUT.aktif || !id) return { mode: "wa", href: waLink(ctx.pesan) };
+  const sah = /^[0-9]+$/.test(String(id || "").trim());   /* productId Satu Momen selalu angka */
+  if (!JJ_CHECKOUT.aktif || !sah) return { mode: "wa", href: waLink(ctx.pesan) };
+  const tema = String(ctx.tema || "").trim();
   const href = JJ_CHECKOUT.urlTemplate
     .replace(/{id}/g, encodeURIComponent(id))
-    .replace(/{tema}/g, encodeURIComponent(ctx.tema || ""))
-    .replace(/{paket}/g, encodeURIComponent(ctx.paket || ""));
+    .replace(/{paket}/g, encodeURIComponent(ctx.paket || ""))
+    .replace(/{tema}/g, encodeURIComponent(tema))
+    /* tema kosong (mis. video ucapan): buang "?theme=" / "&theme=" yang menggantung */
+    .replace(/[?&]theme=(?=$|&)/, "").replace(/\?&/, "?");
   return { mode: "checkout", href: href };
 }
 
