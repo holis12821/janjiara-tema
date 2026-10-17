@@ -37,3 +37,14 @@ Contoh di `<head>`:
 <link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-180.png">
 ```
+
+## Landing page cadangan (GitHub Pages)
+
+`index.html` di repo ini adalah salinan landing page JANJIARA untuk GitHub Pages:
+**https://holis12821.github.io/janjiara-tema/**
+
+- Tetap bisa dibuka walaupun server webinvit sedang gangguan (gambar tema & favicon diambil dari repo ini sendiri, bukan jsDelivr).
+- Tombol pesan, katalog tema, dan pilihan paket tetap mengarah ke WhatsApp admin; menu Masuk dan preview tema tetap ke `janjiaradigital.webinvit.id`.
+- `.nojekyll` memastikan file disajikan apa adanya.
+
+Aktifkan sekali: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `(root)` → Save.**
