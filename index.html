@@ -74,6 +74,7 @@
 
 /* ---------- 2. Reset & base ---------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }   /* kalahkan display dari .btn dll. */
 html { scroll-behavior: smooth; scroll-padding-top: 88px; -webkit-text-size-adjust: 100%; }
 body {
   margin: 0;
@@ -626,7 +627,7 @@ button { font: inherit; cursor: pointer; }
 .jj-banner--rounded { border-radius: var(--radius); overflow: hidden; }
 .jj-banner--shadow { box-shadow: var(--shadow); }
 
-/* ---------- 23. Navbar v5 (Masuk + Form Order) ---------- */
+/* ---------- 23. Navbar v5 (Portal Customer + Form Order) ---------- */
 .nav__menu { gap: 26px; }
 .nav__actions { display: flex; align-items: center; gap: 10px; }
 .nav__actions .btn svg { width: 16px; height: 16px; }
@@ -940,13 +941,13 @@ body.is-video main#utama { display: none; }
         <a href="#faq">FAQ</a>
         <a href="#kontak">Kontak</a>
         <div class="nav__mobile-actions">
-          <a class="btn btn--outline btn--block js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk Portal Pelanggan</a>
+          <a class="btn btn--outline btn--block js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Portal Customer</a>
           <a class="btn btn--primary btn--block" href="#order">Form Order</a>
         </div>
       </div>
     </nav>
     <div class="nav__actions">
-      <a class="btn btn--outline btn--sm js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" title="Portal Pelanggan" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Masuk</a>
+      <a class="btn btn--outline btn--sm js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" title="Portal Customer" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Portal Customer</a>
       <a class="btn btn--primary btn--sm" href="#order">Form Order</a>
     </div>
     <button class="nav__toggle" type="button" aria-controls="menu" aria-expanded="false" aria-label="Buka menu"><span></span></button>
@@ -1738,7 +1739,7 @@ body.is-video main#utama { display: none; }
       </div>
       <div class="catalog-grid" id="catalog-grid"></div>
       <p class="catalog-empty" id="catalog-empty" hidden>Tema tidak ditemukan. Coba kata lain, atau <a href="#" class="js-catalog-wa">tanya admin via WhatsApp</a>.</p>
-      <div class="catalog-more"><button class="btn btn--outline" type="button" id="catalog-more" hidden>Muat lebih banyak</button></div>
+      <div class="catalog-more" hidden><button class="btn btn--outline" type="button" id="catalog-more">Muat lebih banyak</button></div>
     </div>
   </section>
 </div>
@@ -1775,7 +1776,7 @@ body.is-video main#utama { display: none; }
       </div>
       <div class="vcat-grid" id="vcat-grid"></div>
       <p class="catalog-empty" id="vcat-empty" hidden>Video tidak ditemukan. Coba kata lain, atau <a href="#" class="js-video-wa">tanya admin via WhatsApp</a>.</p>
-      <div class="catalog-more"><button class="btn btn--outline" type="button" id="vcat-more" hidden>Muat lebih banyak</button></div>
+      <div class="catalog-more" hidden><button class="btn btn--outline" type="button" id="vcat-more">Muat lebih banyak</button></div>
     </div>
   </section>
 </div>
@@ -1959,8 +1960,120 @@ const PAKET = {
 };
 
 function waLink(text) {
-  return "https://api.whatsapp.com/send?phone=" + JANJIARA.waPhone + "&text=" + encodeURIComponent(text || JANJIARA.waDefaultText);
+  return "https://wa.me/" + JANJIARA.waPhone + "?text=" + encodeURIComponent(text || JANJIARA.waDefaultText);
 }
+
+/* =====================================================================
+   CHECKOUT OTOMATIS (Satu Momen) — satu tempat untuk semua tombol pesan
+   ---------------------------------------------------------------------
+   Cara kerja: setiap tombol pesan membawa data pesanan (data-order).
+   Saat diklik, link diputuskan di satu tempat (jjOrderTarget):
+
+     checkout AKTIF  + produk punya ID  -> buka halaman checkout (express)
+     checkout MATI   atau ID kosong     -> buka WhatsApp admin JANJIARA
+
+   href pada tombol SELALU berisi link WhatsApp. Jadi kalau JavaScript
+   gagal jalan, atau ID produk belum diisi, pesanan tetap sampai ke admin.
+   Tidak ada tombol yang bisa berakhir buntu.
+
+   CARA MENGAKTIFKAN:
+   1. Isi "id" tiap paket di JJ_CHECKOUT.produk dari dashboard Satu Momen.
+   2. Samakan urlTemplate dengan format checkout Satu Momen yang asli.
+   3. Set aktif: true.  (atau pakai statusUrl di bawah agar bisa
+      dinyalakan/dimatikan tanpa mengedit file ini)
+
+   CEK KAPAN SAJA: buka Console browser, ketik  JJ.checkout()
+   ===================================================================== */
+const JJ_CHECKOUT = {
+  /* Saklar utama. false = semua tombol ke WhatsApp admin. */
+  aktif: false,
+
+  /* Format link checkout Satu Momen. Placeholder yang tersedia:
+       {id}     -> ID produk
+       {tema}   -> slug/nama tema atau video
+       {paket}  -> nama paket (Janji / Cerita / Purnama)
+     >>> PASTIKAN format ini sama persis dengan checkout Satu Momen. <<< */
+  urlTemplate: "https://janjiaraundangan.webinvit.id/checkout?produk={id}&tema={tema}",
+
+  /* OPSIONAL — saklar jarak jauh. Diisi URL file JSON berisi:
+         { "aktif": true }
+     Gunanya: menyalakan/mematikan checkout tanpa mengedit & upload ulang
+     HTML ini. Simpan checkout.json di repo janjiara-tema, lalu isi:
+       "https://raw.githubusercontent.com/holis12821/janjiara-tema/main/checkout.json"
+     Dikosongkan = tidak ada pengecekan, nilai "aktif" di atas yang dipakai.
+     Bila file gagal diambil (offline/404), nilai "aktif" di atas tetap dipakai. */
+  statusUrl: "",
+  timeoutMs: 2500,
+
+  /* ID produk dari dashboard Satu Momen. Kosong = tombol itu ke WhatsApp.
+     Jadi bisa dinyalakan bertahap: isi satu ID, satu tombol pindah ke checkout. */
+  produk: {
+    paket: { "Janji": "", "Cerita": "", "Purnama": "" },  /* undangan per paket */
+    video: { "_semua": "" }                                /* video ucapan; pakai slug utk harga beda */
+  }
+};
+
+/* Tentukan tujuan satu tombol pesan. ctx: { jenis, paket, tema, pesan } */
+function jjProdukId(ctx) {
+  const P = JJ_CHECKOUT.produk;
+  if (ctx.jenis === "video") return (P.video && (P.video[ctx.tema] || P.video._semua)) || "";
+  return (P.paket && P.paket[ctx.paket]) || "";
+}
+function jjOrderTarget(ctx) {
+  const id = jjProdukId(ctx);
+  if (!JJ_CHECKOUT.aktif || !id) return { mode: "wa", href: waLink(ctx.pesan) };
+  const href = JJ_CHECKOUT.urlTemplate
+    .replace(/{id}/g, encodeURIComponent(id))
+    .replace(/{tema}/g, encodeURIComponent(ctx.tema || ""))
+    .replace(/{paket}/g, encodeURIComponent(ctx.paket || ""));
+  return { mode: "checkout", href: href };
+}
+
+(function () {
+  /* Saklar jarak jauh (kalau statusUrl diisi). Gagal = diamkan, tetap pakai nilai lokal. */
+  if (JJ_CHECKOUT.statusUrl && window.fetch && window.AbortController) {
+    const ac = new AbortController();
+    const t = setTimeout(function () { ac.abort(); }, JJ_CHECKOUT.timeoutMs);
+    fetch(JJ_CHECKOUT.statusUrl, { signal: ac.signal, cache: "no-store" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (j) { if (j && typeof j.aktif === "boolean") JJ_CHECKOUT.aktif = j.aktif; })
+      .catch(function () { /* biarkan: nilai lokal yang dipakai */ })
+      .finally(function () { clearTimeout(t); });
+  }
+
+  /* Semua tombol ber-data-order lewat sini. href WhatsApp tetap jadi cadangan. */
+  document.addEventListener("click", function (e) {
+    const a = e.target.closest("[data-order]");
+    if (!a) return;
+    let ctx; try { ctx = JSON.parse(a.dataset.order); } catch (err) { return; }
+    const t = jjOrderTarget(ctx);
+    if (t.mode !== "checkout") return;        /* biarkan href WhatsApp bekerja */
+    e.preventDefault();
+    window.open(t.href, "_blank", "noopener");
+  });
+
+  /* Alat bantu cek status — ketik JJ.checkout() di Console browser. */
+  window.JJ = window.JJ || {};
+  window.JJ.checkout = function () {
+    const P = JJ_CHECKOUT.produk;
+    const isi = [];
+    Object.keys(P.paket).forEach(function (k) { isi.push(["Paket " + k, P.paket[k]]); });
+    Object.keys(P.video).forEach(function (k) { isi.push(["Video " + k, P.video[k]]); });
+    const siap = isi.filter(function (r) { return r[1]; });
+    console.log("%cJANJIARA — status checkout otomatis", "font-weight:bold");
+    console.log("  Saklar aktif      :", JJ_CHECKOUT.aktif);
+    console.log("  Saklar jarak jauh :", JJ_CHECKOUT.statusUrl || "(tidak dipakai)");
+    console.log("  Format link       :", JJ_CHECKOUT.urlTemplate);
+    console.log("  Produk ber-ID     :", siap.length + " dari " + isi.length);
+    console.table(isi.map(function (r) {
+      return { Produk: r[0], "ID produk": r[1] || "(kosong)",
+               Tujuan: (JJ_CHECKOUT.aktif && r[1]) ? "Halaman checkout" : "WhatsApp admin" };
+    }));
+    return JJ_CHECKOUT.aktif
+      ? (siap.length ? "Checkout AKTIF untuk " + siap.length + " produk." : "Saklar aktif, tapi belum ada ID produk -> semua ke WhatsApp.")
+      : "Checkout MATI -> semua tombol ke WhatsApp admin.";
+  };
+})();
 
 (function () {
   document.documentElement.classList.remove("no-js");
@@ -2081,7 +2194,7 @@ function waLink(text) {
     links.forEach(function (l) { const s = document.querySelector(l.getAttribute("href")); if (s) spy.observe(s); });
   }
 
-  /* Platform links (tombol Masuk → Portal Pelanggan) */
+  /* Platform links (tombol Portal Customer → /portal/login) */
   document.querySelectorAll(".js-site").forEach(function (a) { a.href = JANJIARA.siteUrl + a.dataset.path; });
 
   /* Theme catalog from THEMES data (replaces sample cards when filled) */
@@ -2740,7 +2853,10 @@ const JJ_TEMA = [
     pv.href = t.preview || "#"; pv.hidden = !t.preview;
     list.innerHTML = Object.keys(PAKET).map(function (k) {
       const p = PAKET[k];
-      return '<a class="pkg-option" target="_blank" rel="noopener" data-paket="' + esc(k) + '" href="' + esc(waLink(waMessage(k, t.name))) + '">' +
+      const ctx = { jenis: "undangan", paket: k, tema: t.name, pesan: waMessage(k, t.name) };
+      return '<a class="pkg-option" target="_blank" rel="noopener" data-paket="' + esc(k) + '"' +
+        ' data-order="' + esc(JSON.stringify(ctx)) + '"' +
+        ' href="' + esc(waLink(ctx.pesan)) + '">' +
         '<span><b>' + esc(k) + '</b>' + (k === "Cerita" ? '<em>Paling diminati</em>' : '') + '</span>' +
         '<span class="pkg-option__price">' + esc(p.opening) + '<s>' + esc(p.normal) + '</s></span>' +
         '<span class="pkg-option__meta">Masa aktif ' + esc(p.aktif) + ' · ' + esc(p.kerja) + '</span></a>';
@@ -2809,7 +2925,8 @@ const JJ_TEMA = [
     const next = state.list.slice(state.shown, state.shown + JJ_CATALOG.pageSize);
     grid.insertAdjacentHTML("beforeend", next.map(card).join(""));
     state.shown += next.length;
-    more.hidden = state.shown >= state.list.length;
+    /* Sembunyikan tombol DAN pembungkusnya bila semua item sudah tampil. */
+    more.parentElement.hidden = state.shown >= state.list.length;
     empty.hidden = state.list.length > 0;
     countEl.textContent = state.list.length ? "Menampilkan " + state.shown + " dari " + state.list.length + " tema" : "";
   }
@@ -2917,7 +3034,9 @@ const JJ_VIDEO = [
     document.getElementById("vplayer-title").textContent = v.name;
     document.getElementById("vplayer-kat").textContent = "Ucapan " + (KAT[v.cat] ? KAT[v.cat].label : "Spesial");
     document.getElementById("vplayer-dur").textContent = "Durasi " + v.dur + " (menit:detik)";
-    document.getElementById("vplayer-wa").href = waLink(waMessage(v));
+    const wa = document.getElementById("vplayer-wa");
+    wa.href = waLink(waMessage(v));
+    wa.dataset.order = JSON.stringify({ jenis: "video", tema: v.slug, pesan: waMessage(v) });
     media.poster = v.poster;
     media.src = v.src;          /* src baru dipasang saat dibuka: nol bandwidth sebelum diklik */
     player.hidden = false; document.body.classList.add("has-picker");
@@ -2948,7 +3067,9 @@ const JJ_VIDEO = [
       '<div class="video-card__body">' +
         '<div class="video-card__top"><h3>' + esc(v.name) + '</h3><span class="tag ' + k.tag + '">' + esc(k.label) + '</span></div>' +
         '<div class="video-card__actions">' +
-          '<a class="btn btn--primary btn--sm" href="' + esc(waLink(waMessage(v))) + '" target="_blank" rel="noopener">Pesan video ini</a>' +
+          '<a class="btn btn--primary btn--sm" target="_blank" rel="noopener"' +
+            ' data-order="' + esc(JSON.stringify({ jenis: "video", tema: v.slug, pesan: waMessage(v) })) + '"' +
+            ' href="' + esc(waLink(waMessage(v))) + '">Pesan video ini</a>' +
         '</div>' +
       '</div></article>';
   }
@@ -3006,7 +3127,8 @@ const JJ_VIDEO = [
     const next = state.list.slice(state.shown, state.shown + CFG.pageSize);
     grid.insertAdjacentHTML("beforeend", next.map(card).join(""));
     state.shown += next.length;
-    more.hidden = state.shown >= state.list.length;
+    /* Sembunyikan tombol DAN pembungkusnya bila semua item sudah tampil. */
+    more.parentElement.hidden = state.shown >= state.list.length;
     empty.hidden = state.list.length > 0;
     countEl.textContent = state.list.length ? "Menampilkan " + state.shown + " dari " + state.list.length + " video" : "";
   }

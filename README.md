@@ -73,6 +73,38 @@ Contoh di `<head>`:
 <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-180.png">
 ```
 
+## Checkout otomatis (Satu Momen)
+
+`checkout.json` adalah saklar jarak jauh untuk checkout otomatis:
+
+```json
+{ "aktif": true }
+```
+
+Landing page membacanya saat dibuka, jadi checkout bisa dinyalakan/dimatikan
+tanpa mengedit dan mengunggah ulang HTML — cukup ubah file ini, commit, push.
+
+Agar dipakai, isi `JJ_CHECKOUT.statusUrl` di landing page dengan:
+
+```
+https://raw.githubusercontent.com/holis12821/janjiara-tema/main/checkout.json
+```
+
+(`raw.githubusercontent.com`, **bukan** jsDelivr — jsDelivr menyimpan cache
+`@main` sampai 12 jam, jadi saklarnya tidak akan langsung berubah.)
+
+Aturan yang berlaku di landing page:
+
+| Saklar | ID produk | Tombol pesan menuju |
+|---|---|---|
+| aktif | terisi | Halaman checkout Satu Momen |
+| aktif | kosong | WhatsApp admin JANJIARA |
+| mati | apa pun | WhatsApp admin JANJIARA |
+| file gagal diambil | apa pun | Nilai `aktif` yang tertulis di HTML |
+
+Jadi tidak ada tombol yang bisa berakhir buntu. Cek status kapan saja lewat
+Console browser: `JJ.checkout()`.
+
 ## Landing page cadangan (GitHub Pages)
 
 `index.html` di repo ini adalah salinan landing page JANJIARA untuk GitHub Pages:
