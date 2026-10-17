@@ -1,4 +1,0 @@
-{
-  "_catatan": "Saklar jarak jauh checkout otomatis Satu Momen. Ubah 'aktif' lalu commit & push — landing page membacanya saat dibuka, tanpa perlu edit HTML. Isi JJ_CHECKOUT.statusUrl di landing page dengan URL raw file ini agar dipakai.",
-  "aktif": false
-}
