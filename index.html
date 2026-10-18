@@ -1959,12 +1959,17 @@ const SITE_PREVIEW = JANJIARA.siteUrl + "/preview/";
    di sebelah file HTML ini — begitu halaman dipasang di subdomain tanpa
    folder itu, semua gambar tema hilang. URL CDN di bawah selalu berhasil
    dari domain atau folder mana pun.
-   Dikunci ke tag rilis "@v1.0.0" supaya cache CDN permanen dan gambar langsung
-   tampil. Dengan "@main", gambar yang baru diunggah bisa tertunda sampai ±12 jam.
-   MENAMBAH / MENGGANTI GAMBAR TEMA: unggah file ke repo, lalu buat tag baru
-   (git tag v1.0.1 && git push origin v1.0.1) dan ganti nomor versi di baris ini
-   serta di JJ_VIDEO_CFG. Tanpa tag baru, gambar baru tidak akan muncul. */
-const TEMA_IMG = "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/tema/";
+   Memakai "@main": selalu mengikuti isi terbaru repo. Gambar yang baru diunggah
+   bisa tertunda sampai ±12 jam karena cache CDN.
+   PENTING: repo holis12821/janjiara-tema HARUS tetap publik. jsDelivr tidak
+   melayani repo privat sama sekali, jadi begitu repo diprivat seluruh gambar
+   tema dan video di halaman ini hilang.
+   Sempat dikunci ke tag "@v1.0.0", tetapi saat repo sebentar diprivat jsDelivr
+   ikut menyimpan jawaban 404 untuk jalur tag tersebut. Jalur tag baru bisa
+   dipakai lagi setelah jsDelivr menyegarkan daftar tag repo (±12-24 jam):
+   git tag v1.0.2 && git push origin v1.0.2, lalu ganti "@main" di baris ini
+   dan di JJ_VIDEO_CFG menjadi "@v1.0.2" — uji dulu URL-nya sebelum dipasang. */
+const TEMA_IMG = "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/";
 /* 12 tema pilihan untuk section Tema di landing page. Katalog lengkap ada di halaman #katalog-tema (data: JJ_TEMA). */
 const THEMES = [
   { nama: "Adat Jawa", kategori: "wedding", gambar: TEMA_IMG + "adat-jawa.webp", preview: SITE_PREVIEW + "adat-jawa", deskripsi: "", badge: "" },
@@ -3175,11 +3180,10 @@ const JJ_TEMA = [
      Saya mau order Video Ucapan *Merry Christmas Pastel*
    ===================================================================== */
 const JJ_VIDEO_CFG = {
-  /* Sumber file, dikunci ke tag rilis yang sama dengan TEMA_IMG supaya cache CDN permanen.
-     Menambah video: unggah file + poster ke repo, buat tag baru
-     (git tag v1.0.1 && git push origin v1.0.1), lalu ganti nomor versi di sini dan di TEMA_IMG. */
-  cdnBase:    "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/video/",
-  posterBase: "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/video/poster/",
+  /* Sumber file, mengikuti "@main" sama seperti TEMA_IMG. Lihat catatan lengkap di TEMA_IMG,
+     termasuk syarat repo harus tetap publik dan cara pindah ke tag rilis nanti. */
+  cdnBase:    "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/",
+  posterBase: "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/poster/",
   durasi:     "0:30",   // durasi default bila tidak diisi per baris
   pageSize:   12,       // jumlah kartu per "Muat lebih banyak"
   teaser:     4         // jumlah kartu di seksi Video Ucapan pada landing page
