@@ -1,2 +1,12 @@
 tema-src/
 .DS_Store
+
+# Dokumen internal JANJIARA — JANGAN pernah masuk repo ini.
+# Repo ini PUBLIK (wajib, agar jsDelivr bisa melayani gambar tema & video),
+# jadi apa pun yang memuat HPP, margin, harga beli, atau nama platform
+# pemasok disimpan di ~/Documents/janjiara-dokumen-internal/ saja.
+janjiara-update-custom-tema/
+JANJIARA_Perhitungan_HPP*
+JANJIARA_Prompt_Update_Landing_Page*
+JANJIARA_Checkout_Redirect_Product_ID.md
+*.pdf
