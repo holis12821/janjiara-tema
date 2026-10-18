@@ -10,14 +10,55 @@ https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/tema/SLUG.webp
 
 Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/adat-jawa.webp
 
-- `SLUG` = nama file tema, huruf kecil, tanda hubung tetap (sama dengan slug preview `https://janjiaradigital.webinvit.id/preview/SLUG`).
+- `SLUG` = nama file tema, huruf kecil, tanda hubung tetap (sama dengan slug preview `https://janjiaraundangan.webinvit.id/preview/SLUG`).
 - `VERSI` = tag rilis (mis. `v1.0.0`). Link dengan tag di-cache permanen oleh jsDelivr, jadi cepat dan stabil.
 
 ## Menambah tema baru
 
 1. Simpan gambar sebagai `tema/slug.webp` (persegi, ±600×600, WebP).
 2. Commit & push, lalu buat tag baru: `git tag v1.0.1 && git push origin v1.0.1`.
-3. Di HTML landing page, ubah `JJ_IMG_BASE` ke `@v1.0.1` dan tambah satu baris di `JJ_TEMA`.
+3. Di `index.html`, tambah satu baris di `JJ_TEMA`. Bila memakai tag, ubah juga
+   `TEMA_IMG` (dan `JJ_VIDEO_CFG` untuk video) ke tag baru tersebut.
+4. **Pastikan slug-nya sudah terbit** di `https://janjiaraundangan.webinvit.id/preview/SLUG`.
+   Kalau 404, tombol "Preview" di kartu tema akan membuka halaman kosong.
+
+## Repo ini harus tetap publik
+
+jsDelivr **tidak melayani repo privat**. Begitu repo ini diprivatkan, seluruh gambar
+tema dan video di landing page hilang (hanya file yang kebetulan masih ter-cache yang
+bertahan), dan GitHub Pages ikut mati. Dokumen bisnis karena itu disimpan di luar repo,
+bukan dengan mengubah visibilitas repo.
+
+Catatan: jsDelivr juga menyimpan jawaban 404. Bila repo sempat diprivat, jalur tag yang
+sedang dipakai bisa terus 404 walau sudah dipublikkan lagi dan di-purge. Jalur `@main`
+biasanya pulih lebih dulu.
+
+## Tema yang dihapus (18 Oktober 2026)
+
+Isi folder `tema/` **harus cocok satu-satu** dengan daftar `JJ_TEMA` di landing page,
+dan setiap slug harus punya halaman preview di platform undangan mitra. Pada 18 Oktober
+2026, 26 tema dihapus dari repo dan dari katalog:
+
+- **25 tema** karena slug-nya belum terbit di platform mitra, sehingga tombol "Preview"
+  menuju halaman 404. Temanya memang belum tersedia di sana, bukan salah penamaan —
+  sudah diuji dengan puluhan variasi nama. Bila nanti mitra menerbitkannya, gambar dan
+  baris `JJ_TEMA`-nya tinggal dikembalikan.
+  <br>`adat-bugis` `amalia` `bali-watercolor` `blue-lotus` `blue-underated` `deep-space`
+  `exclusive-lunch` `fantasy-wedding` `image` `jawa-palembang2` `jawa-sumbawa`
+  `maroon-flower` `nabila` `pastel-flowers` `pastel-flowers2` `pestapora` `pink-lovely`
+  `pyramid` `retro-1` `reuni-akbar` `sakura-gray` `suffolk-house` `vintage-blue`
+  `vintage-pink` `wijaya-kusuma`
+- **1 tema** (`2tahun-uici`) karena namanya tampil janggal di katalog ("2tahun Uici").
+
+Tiga tema lain hanya salah nama file, jadi di-rename agar cocok dengan slug di platform:
+
+| Nama file lama | Nama file sekarang | Judul di platform |
+|---|---|---|
+| `Wedding-Salsa.webp` | `salsa.webp` | Wedding - Salsa |
+| `aceh-palembang.webp` | `palembang-aceh.webp` | Wedding - Palembang Aceh |
+| `year-and-gathering.webp` | `year-end-gathering.webp` | Umum & Seminar - Year End Gathering |
+
+Jumlah tema sekarang: **433**.
 
 ## Video ucapan
 
@@ -51,7 +92,7 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-ta
    ```
 
 2. Commit & push.
-3. Di `janjiara-landing-page.html`, tambah satu baris di `JJ_VIDEO`
+3. Di `index.html`, tambah satu baris di `JJ_VIDEO`
    (cari komentar "KATALOG VIDEO UCAPAN").
 
 ## Favicon JANJIARA
@@ -73,13 +114,20 @@ Contoh di `<head>`:
 <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-180.png">
 ```
 
-## Landing page cadangan (GitHub Pages)
+## Landing page (`index.html`)
 
-`index.html` di repo ini adalah salinan landing page JANJIARA untuk GitHub Pages:
-**https://holis12821.github.io/janjiara-tema/**
+`index.html` adalah **satu-satunya** berkas landing page JANJIARA. Dipakai untuk dua hal
+sekaligus, jadi cukup diedit di satu tempat:
 
-- Tetap bisa dibuka walaupun server webinvit sedang gangguan (gambar tema & favicon diambil dari repo ini sendiri, bukan jsDelivr).
+1. **GitHub Pages** — tersaji langsung di **https://holis12821.github.io/janjiara-tema/**
+2. **Dashboard webinvit** — isinya dicopy apa adanya ke halaman di dashboard
+
+- Tetap bisa dibuka walaupun server webinvit sedang gangguan: favicon ditanam inline
+  (data URI), gambar tema & video diambil dari repo ini lewat jsDelivr, jadi halamannya
+  mandiri dan tidak bergantung pada webinvit.
 - Tombol pesan, katalog tema, dan pilihan paket tetap mengarah ke WhatsApp admin; menu Masuk dan preview tema tetap ke `janjiaradigital.webinvit.id`.
 - `.nojekyll` memastikan file disajikan apa adanya.
+- Dulu ada salinan kedua (`janjiara-landing-page.html`) yang isinya identik. Salinan itu
+  dihapus karena pernah tertinggal satu versi dan harus disamakan manual.
 
 Aktifkan sekali: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `(root)` → Save.**
