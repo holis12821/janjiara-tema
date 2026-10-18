@@ -1286,7 +1286,7 @@ body.is-video main#utama { display: none; }
     </div>
     <ol class="steps">
       <li class="step reveal"><span class="step__num">1</span><h3>Pilih tema &amp; paket</h3><p>Lihat katalog lalu pilih tema dan paket yang sesuai acara Anda.</p></li>
-      <li class="step reveal"><span class="step__num">2</span><h3>Kirim data acara</h3><p>Isi formulir data: nama, jadwal, lokasi, foto, dan musik pilihan.</p></li>
+      <li class="step reveal"><span class="step__num">2</span><h3>Kirim data acara</h3><p>Isi Form Order: nama, jadwal, lokasi, musik, dan satu link Google Drive berisi foto serta aset desain.</p></li>
       <li class="step reveal"><span class="step__num">3</span><h3>Cek preview</h3><p>Kami kirim preview undangan untuk dicek dan direvisi bila perlu.</p></li>
       <li class="step reveal"><span class="step__num">4</span><h3>Bagikan ke tamu</h3><p>Terima tautan final dan daftar link per nama tamu untuk dikirim.</p></li>
     </ol>
@@ -1465,12 +1465,21 @@ body.is-video main#utama { display: none; }
         <div class="answer">
           <p>Bisa, lewat add-on <b>custom tema</b> khusus Paket Cerita dan Purnama. Bila Anda memesan Paket Janji dan ingin tema custom, silakan upgrade dulu ke Paket Cerita. Desain tema dikerjakan oleh tim desain platform undangan mitra JANJIARA; admin JANJIARA mengurus brief, komunikasi, dan pengecekan hasil sampai undangan selesai.</p>
           <p><b>Harga.</b> Rp150.000 bila aset desain sudah ada, Rp275.000 bila desain dibuat dari awal. Harga tetap, terpisah dari harga paket, dan tidak ikut harga opening, voucher, atau promo lain.</p>
-          <p><b>Aset desain</b> adalah file siap pakai seperti ornamen, ilustrasi, bingkai, latar, atau monogram (PNG transparan, SVG, PSD, atau AI) yang boleh Anda gunakan. Foto dan teks undangan bukan aset desain. Gambar inspirasi atau tangkapan layar undangan lain dihitung sebagai referensi, jadi masuk kategori desain dari awal. Admin memastikan kategorinya setelah melihat file Anda, sebelum pembayaran.</p>
+          <p><b>Aset desain</b> adalah file siap pakai seperti ornamen, ilustrasi, bingkai, latar, atau monogram (PNG transparan, SVG, PSD, atau AI) yang boleh Anda gunakan. Foto dan teks undangan bukan aset desain. Gambar inspirasi atau tangkapan layar undangan lain dihitung sebagai referensi, jadi masuk kategori desain dari awal. Admin memastikan kategorinya setelah melihat file Anda, sebelum pembayaran. Kirimkan aset atau referensinya lewat <a href="#faq-drive">satu link Google Drive</a> di Form Order bagian 6.</p>
           <p><b>Pembayaran.</b> Biaya custom tema dibayar 100% di awal, terpisah dari DP 50% paket. Contoh Cerita harga opening dengan aset sudah ada: Rp150.000 + DP Rp69.500 = Rp219.500 di awal, sisa Rp69.500 dilunasi setelah draft disetujui. Pengerjaan desain dimulai setelah pembayaran diterima dan brief lengkap.</p>
           <p><b>Pembatalan.</b> Sebelum pesanan diteruskan ke tim desain, biaya custom tema dikembalikan penuh. Setelah diteruskan, biaya custom tema tidak dapat dikembalikan.</p>
           <p><b>Revisi.</b> Revisi desain tema mengikuti ketentuan tim desain mitra; jumlahnya disampaikan admin sebelum pembayaran. Jatah revisi paket (misalnya 3 kali di Paket Cerita) berlaku untuk konten undangan, bukan desain tema. Perubahan konsep besar setelah desain dikerjakan dihitung sebagai pesanan custom tema baru.</p>
           <p><b>Waktu.</b> Estimasi waktu desain mengikuti antrean tim desain dan disampaikan sebelum pembayaran, di luar waktu pengerjaan paket. Add-on pengerjaan kilat tidak mempercepat desain custom tema, jadi pesan jauh hari sebelum undangan akan disebar.</p>
           <p style="margin:0"><b>Hak pakai.</b> Pastikan aset dan referensi boleh Anda gunakan. Kami tidak bisa membuat desain yang meniru karakter berlisensi, logo merek, atau karya milik pihak lain.</p>
+        </div>
+      </details>
+      <details class="faq-item" id="faq-drive">
+        <summary>Bagaimana cara mengirim foto dan aset desainnya?</summary>
+        <div class="answer">
+          <p>Lewat <b>satu link Google Drive</b>. Kumpulkan semua bahan dalam satu folder, lalu tempel tautannya di kolom <i>Link folder Google Drive</i> pada Form Order bagian 6, atau kirim langsung ke admin via WhatsApp.</p>
+          <p>Isi foldernya menyesuaikan kebutuhan acara Anda: foto mempelai atau tokoh acara, foto pre-wedding dan galeri, logo atau lambang acara, dan — bila memesan <a href="#faq-custom-tema">custom tema</a> — aset desain seperti ornamen, ilustrasi, bingkai, latar, atau monogram dalam PNG transparan, SVG, PSD, atau AI.</p>
+          <p>Agar kami bisa membukanya, atur akses folder ke <b>&ldquo;Siapa saja yang memiliki link&rdquo;</b>. Kirimkan foto dengan resolusi aslinya, jangan hasil kompresi WhatsApp, supaya tetap tajam di undangan.</p>
+          <p style="margin:0">Kolom ini opsional. Bila bahannya belum siap, Form Order tetap bisa dikirim dan linknya menyusul ke admin.</p>
         </div>
       </details>
       <details class="faq-item">
@@ -1671,7 +1680,17 @@ body.is-video main#utama { display: none; }
         </fieldset>
 
         <fieldset class="order-card">
-          <legend><b>6</b>Amplop digital &amp; kado <small>(opsional)</small></legend>
+          <legend><b>6</b>Foto &amp; aset undangan <small>(opsional)</small></legend>
+          <div class="field-grid">
+            <label class="field field--full"><span>Link folder Google Drive <small>(opsional)</small></span>
+              <input name="drive" type="url" inputmode="url" placeholder="https://drive.google.com/drive/folders/..." data-label="Link Google Drive">
+            </label>
+          </div>
+          <p class="order-hint">Kumpulkan semua bahan undangan dalam <b>satu folder Google Drive</b>, lalu tempel tautannya di sini — foto mempelai atau tokoh acara, foto pre-wedding dan galeri, logo atau lambang acara, serta aset desain bila Anda memesan custom tema (ornamen, ilustrasi, bingkai, latar, monogram dalam PNG transparan, SVG, PSD, atau AI). Atur akses folder ke <b>&ldquo;Siapa saja yang memiliki link&rdquo;</b> supaya kami bisa membukanya. Boleh dikosongkan dan dikirim menyusul ke admin via WhatsApp.</p>
+        </fieldset>
+
+        <fieldset class="order-card">
+          <legend><b>7</b>Amplop digital &amp; kado <small>(opsional)</small></legend>
           <div class="field-grid">
             <label class="field field--full"><span>Amplop digital <small>(opsional)</small></span><textarea name="amplop" rows="2" placeholder="Nama bank — nomor rekening — atas nama" data-label="Amplop digital"></textarea></label>
             <label class="field field--full"><span>Alamat pengiriman kado <small>(opsional)</small></span><textarea name="kado" rows="2" placeholder="Alamat lengkap, kode pos, kontak" data-label="Alamat pengiriman kado"></textarea></label>
@@ -1680,7 +1699,7 @@ body.is-video main#utama { display: none; }
         </fieldset>
 
         <fieldset class="order-card">
-          <legend><b>7</b>Catatan &amp; kode promo</legend>
+          <legend><b>8</b>Catatan &amp; kode promo</legend>
           <div class="field-grid">
             <label class="field field--full"><span>Catatan untuk admin <small>(opsional)</small></span><textarea name="catatan" rows="3" placeholder="Warna favorit, nuansa adat, atau permintaan khusus" data-label="Catatan untuk admin"></textarea></label>
             <label class="field"><span>Kode promo / referral <small>(opsional)</small></span><input name="promo" type="text" placeholder="Contoh: JANJIOPENING" data-label="Kode promo / referral"></label>
@@ -1703,6 +1722,7 @@ body.is-video main#utama { display: none; }
             <div><dt>Harga</dt><dd data-sum="harga">—</dd></div>
             <div><dt>Tema</dt><dd data-sum="tema">—</dd></div>
             <div><dt>Custom tema</dt><dd data-sum="custom">—</dd></div>
+            <div><dt>Link Drive</dt><dd data-sum="drive">—</dd></div>
             <div><dt>Tanggal</dt><dd data-sum="waktu">—</dd></div>
           </dl>
           <p class="order-summary__note">Harga opening berlaku untuk 5 pelanggan pertama atau 14 hari sejak peluncuran. DP minimal 50%. Custom tema dibayar penuh di awal.</p>
@@ -2281,6 +2301,8 @@ function waPesan(isi) {
       : "Custom tema hanya tersedia di Paket Cerita & Purnama. Pilih salah satunya bila ingin desain tema sendiri. ";
     set("custom", ct.value ? ct.options[ct.selectedIndex].text.replace(/^Ya — /, "") : "");
     set("waktu", oform.elements.waktu1.value ? fmtDate(oform.elements.waktu1.value) : "");
+    /* Tautan Drive bisa sangat panjang; di ringkasan cukup ditandai "Terlampir". */
+    set("drive", oform.elements.drive.value.trim() ? "Terlampir" : "");
     syncOrderGate();
   }
   /* ---- Status tombol "Kirim Form Order" -------------------------------
@@ -2439,15 +2461,16 @@ function waPesan(isi) {
       if (bad && !firstBad) firstBad = el;
     });
     /* Kolom opsional tidak memblokir tombol, tapi formatnya tetap diperiksa di sini */
+    const FORMAT_LABEL = { email: "Email", maps1: "Link Google Maps", drive: "Link Google Drive" };
     let badFormat = false;
-    ["email", "maps1"].forEach(function (n) {
+    Object.keys(FORMAT_LABEL).forEach(function (n) {
       const el = oform.elements[n];
       if (el.value && !el.checkValidity()) { el.setAttribute("aria-invalid", "true"); badFormat = true; firstBad = firstBad || el; }
     });
     if (firstBad) {
-      ostatus.textContent = (!badFormat || firstBad.name !== "email" && firstBad.name !== "maps1")
+      ostatus.textContent = (!badFormat || !FORMAT_LABEL[firstBad.name])
         ? "Mohon lengkapi kolom bertanda * yang masih kosong."
-        : "Format " + (firstBad.name === "email" ? "Email" : "Link Google Maps") + " belum benar. Mohon diperbaiki atau dikosongkan.";
+        : "Format " + FORMAT_LABEL[firstBad.name] + " belum benar. Mohon diperbaiki atau dikosongkan.";
       ostatus.className = "form-status order-status is-error";
       syncOrderGate();
       (firstBad.closest(".order-card") || firstBad).scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
