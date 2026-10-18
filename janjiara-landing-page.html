@@ -1438,7 +1438,7 @@ body.is-video main#utama { display: none; }
       </details>
       <details class="faq-item">
         <summary>Apa itu harga opening?</summary>
-        <div class="answer">Harga khusus peluncuran JANJIARA untuk 5 pelanggan pertama atau selama 14 hari sejak peluncuran, mana yang tercapai lebih dulu. Setelah itu berlaku harga normal: Janji Rp109.000, Cerita Rp179.000, dan Purnama Rp299.000. Harga opening tidak dapat digabung dengan promo lain.</div>
+        <div class="answer">Harga khusus peluncuran JANJIARA untuk 5 pelanggan pertama atau selama 14 hari sejak peluncuran, mana yang tercapai lebih dulu. Setelah itu berlaku harga normal: Janji Rp109.000, Cerita Rp179.000, dan Purnama Rp299.000. Harga opening tidak dapat digabung dengan promo lain. Harga opening berlaku untuk harga paket; add-on custom tema tetap memakai harga penuh.</div>
       </details>
       <details class="faq-item">
         <summary>Apakah bisa untuk acara selain pernikahan?</summary>
@@ -1463,7 +1463,7 @@ body.is-video main#utama { display: none; }
       <details class="faq-item" id="faq-custom-tema">
         <summary>Bisa request tema custom di luar katalog?</summary>
         <div class="answer">
-          <p>Bisa, lewat add-on <b>custom tema</b> khusus Paket Cerita dan Purnama. Desain tema dikerjakan oleh tim desain platform undangan mitra JANJIARA; admin JANJIARA mengurus brief, komunikasi, dan pengecekan hasil sampai undangan selesai.</p>
+          <p>Bisa, lewat add-on <b>custom tema</b> khusus Paket Cerita dan Purnama. Bila Anda memesan Paket Janji dan ingin tema custom, silakan upgrade dulu ke Paket Cerita. Desain tema dikerjakan oleh tim desain platform undangan mitra JANJIARA; admin JANJIARA mengurus brief, komunikasi, dan pengecekan hasil sampai undangan selesai.</p>
           <p><b>Harga.</b> Rp150.000 bila aset desain sudah ada, Rp275.000 bila desain dibuat dari awal. Harga tetap, terpisah dari harga paket, dan tidak ikut harga opening, voucher, atau promo lain.</p>
           <p><b>Aset desain</b> adalah file siap pakai seperti ornamen, ilustrasi, bingkai, latar, atau monogram (PNG transparan, SVG, PSD, atau AI) yang boleh Anda gunakan. Foto dan teks undangan bukan aset desain. Gambar inspirasi atau tangkapan layar undangan lain dihitung sebagai referensi, jadi masuk kategori desain dari awal. Admin memastikan kategorinya setelah melihat file Anda, sebelum pembayaran.</p>
           <p><b>Pembayaran.</b> Biaya custom tema dibayar 100% di awal, terpisah dari DP 50% paket. Contoh Cerita harga opening dengan aset sudah ada: Rp150.000 + DP Rp69.500 = Rp219.500 di awal, sisa Rp69.500 dilunasi setelah draft disetujui. Pengerjaan desain dimulai setelah pembayaran diterima dan brief lengkap.</p>
@@ -1475,7 +1475,7 @@ body.is-video main#utama { display: none; }
       </details>
       <details class="faq-item">
         <summary>Bagaimana cara pembayarannya?</summary>
-        <div class="answer">Pembayaran melalui transfer bank atau QRIS, dengan DP minimal 50% sebelum pengerjaan dimulai dan pelunasan sebelum undangan final dikirim. Detail pembayaran dan ketentuan pembatalan kami jelaskan saat konsultasi, sebelum Anda membayar.</div>
+        <div class="answer">Pembayaran melalui transfer bank atau QRIS, dengan DP minimal 50% sebelum pengerjaan dimulai. Sisanya dilunasi setelah draft undangan Anda setujui, lalu tautan final kami kirim. Bila Anda menambahkan <a href="#faq-custom-tema">custom tema</a>, biayanya dibayar 100% di awal bersama DP paket dan tidak ikut harga opening. Detail pembayaran dan ketentuan pembatalan kami jelaskan saat konsultasi, sebelum Anda membayar.</div>
       </details>
     </div>
   </div>
@@ -1939,8 +1939,12 @@ const SITE_PREVIEW = JANJIARA.siteUrl + "/preview/";
    di sebelah file HTML ini — begitu halaman dipasang di subdomain tanpa
    folder itu, semua gambar tema hilang. URL CDN di bawah selalu berhasil
    dari domain atau folder mana pun.
-   Ganti "@main" ke tag rilis (mis. "@v1.0.1") bila ingin cache permanen. */
-const TEMA_IMG = "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/";
+   Dikunci ke tag rilis "@v1.0.0" supaya cache CDN permanen dan gambar langsung
+   tampil. Dengan "@main", gambar yang baru diunggah bisa tertunda sampai ±12 jam.
+   MENAMBAH / MENGGANTI GAMBAR TEMA: unggah file ke repo, lalu buat tag baru
+   (git tag v1.0.1 && git push origin v1.0.1) dan ganti nomor versi di baris ini
+   serta di JJ_VIDEO_CFG. Tanpa tag baru, gambar baru tidak akan muncul. */
+const TEMA_IMG = "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/tema/";
 /* 12 tema pilihan untuk section Tema di landing page. Katalog lengkap ada di halaman #katalog-tema (data: JJ_TEMA). */
 const THEMES = [
   { nama: "Adat Jawa", kategori: "wedding", gambar: TEMA_IMG + "adat-jawa.webp", preview: SITE_PREVIEW + "adat-jawa", deskripsi: "", badge: "" },
@@ -3148,11 +3152,11 @@ const JJ_TEMA = [
      Saya mau order Video Ucapan *Merry Christmas Pastel*
    ===================================================================== */
 const JJ_VIDEO_CFG = {
-  /* Sumber file. "@main" selalu mengikuti versi terbaru di repo.
-     Ingin cache permanen & lebih cepat? Buat tag rilis (git tag v1.1.0 && git push origin v1.1.0)
-     lalu ganti "@main" menjadi "@v1.1.0" pada kedua baris di bawah. */
-  cdnBase:    "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/",
-  posterBase: "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/poster/",
+  /* Sumber file, dikunci ke tag rilis yang sama dengan TEMA_IMG supaya cache CDN permanen.
+     Menambah video: unggah file + poster ke repo, buat tag baru
+     (git tag v1.0.1 && git push origin v1.0.1), lalu ganti nomor versi di sini dan di TEMA_IMG. */
+  cdnBase:    "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/video/",
+  posterBase: "https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@v1.0.0/video/poster/",
   durasi:     "0:30",   // durasi default bila tidak diisi per baris
   pageSize:   12,       // jumlah kartu per "Muat lebih banyak"
   teaser:     4         // jumlah kartu di seksi Video Ucapan pada landing page
