@@ -539,9 +539,9 @@ button { font: inherit; cursor: pointer; }
     transition: max-height .35s var(--ease), visibility .35s;
   }
   .nav__menu.is-open { max-height: 520px; visibility: visible; }
-  .nav__menu a { padding: 14px 4px; border-bottom: 1px solid var(--border); font-size: 1.02rem; }
+  .nav__menu > a { padding: 14px 4px; border-bottom: 1px solid var(--border); font-size: 1.02rem; }
   .nav__menu a::after { display: none; }
-  .nav__menu .btn { margin-top: 16px; border-bottom: 0; color: var(--neutral-50); }
+  .nav__menu > .btn { margin-top: 16px; color: var(--neutral-50); }
   .steps { grid-template-columns: 1fr 1fr; row-gap: 40px; }
   .steps::before { display: none; }
 }
@@ -1407,6 +1407,183 @@ html, body { overflow-x: clip; }
 @keyframes jjDaunBalik { from { transform: rotateY(0deg) rotateX(0deg); } to { transform: rotateY(68deg) rotateX(18deg); } }
 @media (prefers-reduced-motion: reduce) { .jj-daun { display: none; } .couple-card.is-swapping { transition: none; } }
 @media print { .jj-daun { display: none; } }
+
+/* ===== v12 · Menu bottom sheet (HP & tablet) ===== */
+.jj-sheet[hidden] { display: none; }
+.jj-sheet { position: fixed; inset: 0; z-index: 180; }
+.jj-sheet__backdrop {
+  position: absolute; inset: 0; background: rgba(29, 31, 27, .48);
+  -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  opacity: 0; transition: opacity .35s var(--ease);
+}
+.jj-sheet__panel {
+  position: absolute; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 560px;
+  max-height: min(88vh, 720px); display: flex; flex-direction: column; overflow: hidden;
+  background:
+    radial-gradient(120% 70% at 100% 0%, rgba(216, 184, 178, .28), rgba(216, 184, 178, 0) 60%),
+    radial-gradient(90% 60% at 0% 100%, rgba(192, 201, 183, .32), rgba(192, 201, 183, 0) 60%),
+    var(--white-warm);
+  border-radius: 28px 28px 0 0; border: 1px solid var(--gold-300); border-bottom: 0;
+  box-shadow: 0 -18px 48px rgba(29, 31, 27, .22);
+  transform: translateY(104%); transition: transform .5s cubic-bezier(.2, 1.15, .32, 1);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  touch-action: pan-y;
+}
+.jj-sheet__panel::before {
+  content: ""; position: absolute; left: 22%; right: 22%; top: 0; height: 2px; border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold-400), transparent);
+}
+.jj-sheet.is-open .jj-sheet__backdrop { opacity: 1; }
+.jj-sheet.is-open .jj-sheet__panel { transform: translateY(0); }
+.jj-sheet.is-dragging .jj-sheet__panel { transition: none; }
+.jj-sheet__bloom { position: absolute; top: -6px; right: -8px; width: 170px; height: auto; pointer-events: none; z-index: 0; }
+.jj-sheet__grip { display: flex; justify-content: center; padding: 10px 0 2px; cursor: grab; position: relative; z-index: 1; }
+.jj-sheet__grip span { width: 44px; height: 5px; border-radius: 3px; background: var(--neutral-300); }
+.jj-sheet__head { position: relative; z-index: 1; display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 8px 22px 14px; cursor: grab; }
+.jj-sheet__eyebrow { margin: 0 0 4px; font: 500 .7rem/1.3 var(--font-sans); letter-spacing: .22em; text-transform: uppercase; color: var(--olive-700); }
+.jj-sheet__title { margin: 0; font: 600 1.55rem/1.15 var(--font-serif); color: var(--neutral-950); }
+.jj-sheet__title em { color: var(--gold-700, #705829); font-style: italic; }
+.jj-sheet__close {
+  flex: none; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--border);
+  background: rgba(255, 253, 249, .9); display: grid; place-items: center; color: var(--neutral-950); cursor: pointer;
+  transition: transform .25s var(--ease), background .25s var(--ease);
+}
+.jj-sheet__close:hover { transform: rotate(90deg); background: var(--white-warm); }
+.jj-sheet__close svg { width: 20px; height: 20px; }
+.jj-sheet__body { position: relative; z-index: 1; overflow-y: auto; overscroll-behavior: contain; padding: 4px 18px 20px; }
+.jj-sheet__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.jj-sheet__item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 14px; min-height: 68px;
+  border-radius: 18px; background: rgba(255, 253, 249, .78); border: 1px solid var(--olive-200);
+  color: var(--neutral-950); text-decoration: none;
+  opacity: 0; transform: translateY(14px) scale(.98);
+  transition: opacity .4s var(--ease), transform .45s cubic-bezier(.2, 1.2, .32, 1), border-color .25s, background .25s, box-shadow .25s;
+}
+.jj-sheet.is-open .jj-sheet__item { opacity: 1; transform: none; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(1) { transition-delay: .08s; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(2) { transition-delay: .12s; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(3) { transition-delay: .16s; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(4) { transition-delay: .2s; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(5) { transition-delay: .24s; }
+.jj-sheet.is-open .jj-sheet__item:nth-child(6) { transition-delay: .28s; }
+.jj-sheet__item:hover, .jj-sheet__item:focus-visible, .jj-sheet__item.is-active {
+  border-color: var(--gold-300); background: var(--white-warm); box-shadow: 0 8px 20px -12px rgba(89, 102, 74, .45);
+}
+.jj-sheet__item:active { transform: scale(.97); }
+.jj-sheet__ico { flex: none; width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; background: var(--olive-100); color: var(--olive-700); }
+.jj-sheet__item.is-active .jj-sheet__ico { background: var(--olive-700); color: var(--neutral-50); }
+.jj-sheet__ico svg { width: 20px; height: 20px; }
+.jj-sheet__txt { display: grid; gap: 2px; min-width: 0; }
+.jj-sheet__txt b { font: 600 1.12rem/1.1 var(--font-serif); }
+.jj-sheet__txt small { font-size: .8rem; line-height: 1.3; color: var(--text-secondary); }
+.jj-sheet__actions { display: grid; gap: 10px; margin-top: 16px; opacity: 0; transform: translateY(12px); transition: opacity .4s var(--ease) .3s, transform .45s var(--ease) .3s; }
+.jj-sheet.is-open .jj-sheet__actions { opacity: 1; transform: none; }
+.jj-sheet__actions .btn { min-height: 52px; font-size: 1rem; }
+.jj-sheet__actions .btn svg { width: 17px; height: 17px; }
+.jj-sheet__actions .btn--outline { background: var(--white-warm); }
+.jj-sheet__foot { margin: 14px 0 0; text-align: center; font-size: .78rem; letter-spacing: .04em; color: var(--text-secondary); }
+.jj-sheet .jj-petals { z-index: 3; border-radius: 28px 28px 0 0; }
+body.has-sheet { overflow: hidden; }
+body.has-sheet .wa-float { opacity: 0; pointer-events: none; }
+@media (max-width: 1180px) {
+  .nav__menu { display: none !important; }
+}
+@media (min-width: 1181px) {
+  .jj-sheet { display: none !important; }
+}
+@media (max-width: 360px) {
+  .jj-sheet__grid { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jj-sheet__panel, .jj-sheet__backdrop, .jj-sheet__item, .jj-sheet__actions { transition: none; }
+}
+
+/* ===== v13 · Bottom Navigation Bar (HP & tablet) ===== */
+.jj-bnav { display: none; }
+@media (max-width: 1180px) {
+  .nav__toggle { display: none !important; }
+  body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)); }
+  .wa-float { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); right: 16px; }
+  .jj-bnav {
+    display: block; position: fixed; left: 12px; right: 12px; bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+    z-index: 95; max-width: 560px; margin: 0 auto;
+    transform: translateY(140%); opacity: 0;
+    transition: transform .6s cubic-bezier(.2, 1.15, .32, 1), opacity .4s var(--ease);
+  }
+  .jj-bnav.is-in { transform: none; opacity: 1; }
+  .jj-bnav.is-hidden { transform: translateY(140%); opacity: 0; pointer-events: none; }
+  .jj-bnav__bar {
+    position: relative; display: grid; grid-template-columns: repeat(5, 1fr); align-items: end;
+    height: 68px; padding: 0 6px 8px; border-radius: 26px;
+    background:
+      radial-gradient(80% 140% at 50% 120%, rgba(216, 184, 178, .28), rgba(216, 184, 178, 0) 70%),
+      rgba(255, 253, 249, .94);
+    -webkit-backdrop-filter: saturate(150%) blur(14px); backdrop-filter: saturate(150%) blur(14px);
+    border: 1px solid var(--gold-300);
+    box-shadow: 0 14px 34px -10px rgba(41, 42, 38, .32), 0 2px 0 rgba(255, 255, 255, .8) inset;
+  }
+  .jj-bnav__bar::before {
+    content: ""; position: absolute; left: 18%; right: 18%; top: -1px; height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold-400), transparent); opacity: .8;
+  }
+  .jj-bnav__item {
+    position: relative; display: grid; justify-items: center; gap: 3px; padding: 0; border: 0; background: none;
+    font: 500 .7rem/1 var(--font-sans); letter-spacing: .02em; color: var(--neutral-700); text-decoration: none; cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .jj-bnav__ico {
+    width: 44px; height: 32px; border-radius: 16px; display: grid; place-items: center;
+    transition: background .3s var(--ease), color .3s var(--ease), transform .35s cubic-bezier(.2, 1.4, .32, 1);
+  }
+  .jj-bnav__ico svg { width: 22px; height: 22px; }
+  .jj-bnav__label { transition: color .3s var(--ease); }
+  .jj-bnav__item:hover .jj-bnav__ico, .jj-bnav__item:focus-visible .jj-bnav__ico { transform: translateY(-2px); color: var(--olive-700); }
+  .jj-bnav__item.is-active { color: var(--olive-800); }
+  .jj-bnav__item.is-active .jj-bnav__ico { background: var(--olive-100); color: var(--olive-700); }
+  .jj-bnav__item.is-active .jj-bnav__label::after {
+    content: ""; display: block; width: 4px; height: 4px; margin: 3px auto 0; border-radius: 50%; background: var(--gold-400);
+  }
+  .jj-bnav__item:active .jj-bnav__ico, .jj-bnav__item:active .jj-bnav__fab { transform: scale(.9); }
+  .jj-bnav__item--main { align-self: end; }
+  .jj-bnav__fab {
+    width: 58px; height: 58px; margin-top: -26px; border-radius: 50%; display: grid; place-items: center;
+    background: radial-gradient(circle at 35% 30%, #6B785D, var(--olive-700) 60%, var(--olive-800));
+    color: var(--neutral-50); border: 3px solid var(--white-warm);
+    box-shadow: 0 0 0 1.5px var(--gold-400), 0 10px 22px -6px rgba(66, 74, 56, .6);
+    transition: transform .35s cubic-bezier(.2, 1.4, .32, 1), box-shadow .3s var(--ease);
+    animation: jjBnavPulse 3.2s ease-in-out infinite;
+  }
+  .jj-bnav__fab svg { width: 26px; height: 26px; }
+  .jj-bnav__item--main:hover .jj-bnav__fab { transform: translateY(-3px) rotate(-8deg); }
+  .jj-bnav__item--main .jj-bnav__label { color: var(--olive-800); font-weight: 600; }
+  .jj-bnav__item--main.is-active .jj-bnav__fab { box-shadow: 0 0 0 3px var(--gold-400), 0 10px 22px -6px rgba(66, 74, 56, .6); }
+  .jj-bnav__item--main.is-active .jj-bnav__ico { background: none; }
+  /* kelopak yang bertebaran dari bar */
+  .jj-bnav__petals { position: absolute; left: 0; right: 0; bottom: 40px; height: 0; pointer-events: none; z-index: 2; }
+  .jj-bnav__petal {
+    position: absolute; bottom: 0; left: var(--x); width: var(--s); height: calc(var(--s) * 1.3);
+    border-radius: 100% 0 100% 0; background: radial-gradient(circle at 30% 28%, rgba(255, 255, 255, .65), rgba(255, 255, 255, 0) 62%), var(--c);
+    box-shadow: 0 1px 2px rgba(41, 42, 38, .15); opacity: 0; will-change: transform, opacity;
+    animation: jjBnavBloom var(--d) cubic-bezier(.2, .7, .35, 1) var(--dl) forwards;
+  }
+  .jj-bnav__petal.is-flower { border-radius: 50%; background: radial-gradient(circle, var(--gold-400) 0 22%, var(--c) 24% 100%); }
+}
+@keyframes jjBnavBloom {
+  0%   { opacity: 0; transform: translate3d(0, 10px, 0) rotate(var(--r0)) scale(.5); }
+  12%  { opacity: 1; }
+  45%  { transform: translate3d(calc(var(--dx) * .6), calc(var(--rise) * -1), 0) rotate(calc(var(--r0) + 160deg)) scale(1); }
+  100% { opacity: 0; transform: translate3d(var(--dx), calc(var(--rise) * -.45), 0) rotate(calc(var(--r0) + 320deg)) scale(.9); }
+}
+@keyframes jjBnavPulse {
+  0%, 100% { box-shadow: 0 0 0 1.5px var(--gold-400), 0 10px 22px -6px rgba(66, 74, 56, .6); }
+  50%      { box-shadow: 0 0 0 6px rgba(198, 166, 107, .18), 0 10px 22px -6px rgba(66, 74, 56, .6); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jj-bnav, .jj-bnav__ico, .jj-bnav__fab { transition: none; animation: none; }
+  .jj-bnav__petals { display: none; }
+}
+@media print { .jj-bnav { display: none !important; } }
+.no-js .jj-bnav { transform: none; opacity: 1; }
 </style>
 </head>
 <body>
@@ -1588,6 +1765,65 @@ html, body { overflow-x: clip; }
     <button class="nav__toggle" type="button" aria-controls="menu" aria-expanded="false" aria-label="Buka menu"><span></span></button>
   </div>
 </header>
+
+<!-- ============================== MENU BOTTOM SHEET (v12, layar ≤1180px) ==============================
+     Menu navbar desktop ditampilkan sebagai bottom sheet di HP & tablet. Dibuka lewat tombol menu (☰),
+     ditutup dengan tombol ×, ketuk area gelap, geser ke bawah, tombol Esc, atau memilih menu.
+     Isi menu sama dengan navbar desktop; bila menambah menu, tambahkan juga di sini. -->
+<div class="jj-sheet" id="jj-sheet" hidden>
+  <div class="jj-sheet__backdrop" data-sheet-close></div>
+  <div class="jj-sheet__panel" role="dialog" aria-modal="true" aria-labelledby="jj-sheet-title">
+    <svg class="jj-sheet__bloom" viewBox="0 0 220 160" aria-hidden="true">
+      <g opacity=".95">
+        <path d="M150 92c22-30 52-38 70-34-6 22-34 44-70 34z" fill="#869376"/>
+        <path d="M126 70c4-30 26-52 46-56 3 22-16 48-46 56z" fill="#6B785D"/>
+        <path d="M178 120c26-6 40 4 42 14-16 8-34 6-42-14z" fill="#A3AE8F"/>
+        <g transform="translate(176 58)"><ellipse cy="-13" rx="10" ry="15" fill="#D8B8B2"/><ellipse cy="-13" rx="10" ry="15" fill="#D8B8B2" transform="rotate(72)"/><ellipse cy="-13" rx="10" ry="15" fill="#D8B8B2" transform="rotate(144)"/><ellipse cy="-13" rx="10" ry="15" fill="#D8B8B2" transform="rotate(216)"/><ellipse cy="-13" rx="10" ry="15" fill="#D8B8B2" transform="rotate(288)"/><circle r="6" fill="#C6A66B"/></g>
+        <g transform="translate(138 104) scale(.72)"><ellipse cy="-13" rx="10" ry="15" fill="#FFFDF9"/><ellipse cy="-13" rx="10" ry="15" fill="#FFFDF9" transform="rotate(72)"/><ellipse cy="-13" rx="10" ry="15" fill="#FFFDF9" transform="rotate(144)"/><ellipse cy="-13" rx="10" ry="15" fill="#FFFDF9" transform="rotate(216)"/><ellipse cy="-13" rx="10" ry="15" fill="#FFFDF9" transform="rotate(288)"/><circle r="6" fill="#C6A66B"/></g>
+        <g transform="translate(206 96) scale(.55)"><ellipse cy="-13" rx="10" ry="15" fill="#E9D8D5"/><ellipse cy="-13" rx="10" ry="15" fill="#E9D8D5" transform="rotate(72)"/><ellipse cy="-13" rx="10" ry="15" fill="#E9D8D5" transform="rotate(144)"/><ellipse cy="-13" rx="10" ry="15" fill="#E9D8D5" transform="rotate(216)"/><ellipse cy="-13" rx="10" ry="15" fill="#E9D8D5" transform="rotate(288)"/><circle r="6" fill="#C6A66B"/></g>
+        <circle cx="120" cy="40" r="3" fill="#C6A66B"/><circle cx="104" cy="96" r="2.4" fill="#C6A66B"/>
+      </g>
+    </svg>
+    <div class="jj-sheet__grip" aria-hidden="true"><span></span></div>
+    <div class="jj-sheet__head">
+      <div>
+        <p class="jj-sheet__eyebrow">Menu JANJIARA</p>
+        <h2 class="jj-sheet__title" id="jj-sheet-title">Setiap Janji, <em>Punya Cerita.</em></h2>
+      </div>
+      <button class="jj-sheet__close" type="button" data-sheet-close aria-label="Tutup menu"><svg aria-hidden="true"><use href="#i-x"/></svg></button>
+    </div>
+    <div class="jj-sheet__body">
+      <nav class="jj-sheet__grid" aria-label="Menu">
+        <a class="jj-sheet__item" href="#tema"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-flower"/></svg></span><span class="jj-sheet__txt"><b>Tema</b><small><span data-tema-total>433 tema</span></small></span></a>
+        <a class="jj-sheet__item" href="#harga"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-gift"/></svg></span><span class="jj-sheet__txt"><b>Harga</b><small>Paket &amp; promo</small></span></a>
+        <a class="jj-sheet__item" href="#katalog-video"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-film"/></svg></span><span class="jj-sheet__txt"><b>Video</b><small>Video ucapan</small></span></a>
+        <a class="jj-sheet__item" href="#faq"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-chat"/></svg></span><span class="jj-sheet__txt"><b>FAQ</b><small>Tanya jawab</small></span></a>
+        <a class="jj-sheet__item" href="#sk"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-shield"/></svg></span><span class="jj-sheet__txt"><b>S&amp;K</b><small>Ketentuan</small></span></a>
+        <a class="jj-sheet__item" href="#kontak"><span class="jj-sheet__ico"><svg aria-hidden="true"><use href="#i-message"/></svg></span><span class="jj-sheet__txt"><b>Kontak</b><small>Chat admin</small></span></a>
+      </nav>
+      <div class="jj-sheet__actions">
+        <a class="btn btn--outline btn--block js-site" data-path="/portal/login" href="https://janjiaraundangan.webinvit.id/portal/login" target="_top"><svg aria-hidden="true"><use href="#i-user"/></svg>Portal Customer</a>
+        <a class="btn btn--primary btn--block" href="#order">Form Order</a>
+      </div>
+      <p class="jj-sheet__foot">Harga opening mulai Rp49rb · s.d. 4 Nov 2026</p>
+    </div>
+  </div>
+</div>
+
+<!-- ============================== BOTTOM NAVIGATION BAR (v13, layar ≤1180px) ==============================
+     Navbar landing page versi HP & tablet. Tema · Harga · Pesan (Form Order) · Video · Menu.
+     "Menu" membuka panel berisi semua menu navbar desktop (FAQ, S&K, Kontak, Portal Customer, dst).
+     Saat disentuh / di-hover, kelopak bunga bertebaran dari bar. -->
+<nav class="jj-bnav" id="jj-bnav" aria-label="Navigasi bawah">
+  <div class="jj-bnav__petals" aria-hidden="true"></div>
+  <div class="jj-bnav__bar">
+    <a class="jj-bnav__item" href="#tema" data-route="tema"><span class="jj-bnav__ico"><svg aria-hidden="true"><use href="#i-flower"/></svg></span><span class="jj-bnav__label">Tema</span></a>
+    <a class="jj-bnav__item" href="#harga" data-route="harga"><span class="jj-bnav__ico"><svg aria-hidden="true"><use href="#i-gift"/></svg></span><span class="jj-bnav__label">Harga</span></a>
+    <a class="jj-bnav__item jj-bnav__item--main" href="#order" data-route="order"><span class="jj-bnav__fab"><svg aria-hidden="true"><use href="#i-rings"/></svg></span><span class="jj-bnav__label">Pesan</span></a>
+    <a class="jj-bnav__item" href="#katalog-video" data-route="video"><span class="jj-bnav__ico"><svg aria-hidden="true"><use href="#i-film"/></svg></span><span class="jj-bnav__label">Video</span></a>
+    <button class="jj-bnav__item" type="button" data-route="menu" data-bnav-menu aria-haspopup="dialog" aria-controls="jj-sheet"><span class="jj-bnav__ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" aria-hidden="true"><path d="M4.5 7h15M4.5 12h15M4.5 17h9"/></svg></span><span class="jj-bnav__label">Menu</span></button>
+  </div>
+</nav>
 
 <main id="utama">
 
@@ -3094,6 +3330,7 @@ function waPesan(isi) {
   const toggle = document.querySelector(".nav__toggle");
   const menu = document.getElementById("menu");
   toggle.addEventListener("click", function () {
+    if (window.JJ_sheet) { window.JJ_sheet.toggle(); return; }   /* v12: menu tampil sebagai bottom sheet */
     const open = toggle.getAttribute("aria-expanded") === "true";
     toggle.setAttribute("aria-expanded", String(!open));
     toggle.setAttribute("aria-label", open ? "Buka menu" : "Tutup menu");
@@ -5336,6 +5573,201 @@ const JJ_BAYAR = [
     sync();
     window.JJ_daun = { layer: layer, aktif: aktif };
   })();
+})();
+</script>
+<script>
+/* =====================================================================
+   v12 — Menu bottom sheet untuk HP & tablet (≤1180px).
+   Buka: tombol menu. Tutup: tombol ×, ketuk latar gelap, geser ke bawah,
+   Esc, atau memilih menu. Saat disentuh/di-hover, kelopak bunga bertebaran.
+   ===================================================================== */
+(function () {
+  const sheet = document.getElementById("jj-sheet");
+  const toggle = document.querySelector(".nav__toggle");
+  if (!sheet || !toggle) return;
+  const panel = sheet.querySelector(".jj-sheet__panel");
+  const menu = document.getElementById("menu");
+  const reduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  let closing = null, lastBurst = 0;
+
+  function petals() {
+    const now = Date.now();
+    if (reduce.matches || now - lastBurst < 1500 || typeof window.JJ_taburKelopak !== "function") return;
+    lastBurst = now;
+    window.JJ_taburKelopak(panel);
+  }
+  function syncActive() {
+    const cur = menu && menu.querySelector("a.is-active");
+    const href = cur ? cur.getAttribute("href") : (location.hash || "").split("?")[0];
+    sheet.querySelectorAll(".jj-sheet__item").forEach(function (a) { a.classList.toggle("is-active", a.getAttribute("href") === href); });
+  }
+  function isOpen() { return sheet.classList.contains("is-open"); }
+  function open() {
+    clearTimeout(closing);
+    syncActive();
+    sheet.hidden = false;
+    document.body.classList.add("has-sheet");
+    toggle.setAttribute("aria-expanded", "true"); toggle.setAttribute("aria-label", "Tutup menu");
+    void panel.offsetWidth;
+    sheet.classList.add("is-open");
+    setTimeout(function () { const c = sheet.querySelector(".jj-sheet__close"); if (c) c.focus({ preventScroll: true }); }, 60);
+    setTimeout(petals, 260);
+  }
+  function close(focusToggle) {
+    if (!isOpen()) return;
+    sheet.classList.remove("is-open", "is-dragging");
+    panel.style.transform = "";
+    document.body.classList.remove("has-sheet");
+    toggle.setAttribute("aria-expanded", "false"); toggle.setAttribute("aria-label", "Buka menu");
+    closing = setTimeout(function () { sheet.hidden = true; }, reduce.matches ? 0 : 480);
+    if (focusToggle) toggle.focus({ preventScroll: true });
+  }
+  window.JJ_sheet = { open: open, close: close, toggle: function () { isOpen() ? close(true) : open(); } };
+
+  sheet.addEventListener("click", function (e) {
+    if (e.target.closest("[data-sheet-close]")) { close(true); return; }
+    if (e.target.closest("a[href]")) close(false);          /* navigasi tetap berjalan */
+  });
+  document.addEventListener("keydown", function (e) {
+    if (!isOpen()) return;
+    if (e.key === "Escape") { close(true); return; }
+    if (e.key === "Tab") {                                   /* fokus tetap di dalam sheet */
+      const f = Array.from(panel.querySelectorAll("a[href], button")).filter(function (el) { return el.offsetParent !== null; });
+      if (!f.length) return;
+      const first = f[0], last = f[f.length - 1];
+      if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+      else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+    }
+  });
+  window.addEventListener("hashchange", function () { close(false); });
+  window.addEventListener("resize", function () { if (window.innerWidth > 1180) close(false); });
+
+  /* kelopak bunga saat sheet di-hover (laptop/tablet dengan mouse) atau disentuh (HP) */
+  panel.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") petals(); });
+  panel.addEventListener("pointerdown", function (e) { if (e.pointerType !== "mouse") petals(); }, { passive: true });
+
+  /* geser ke bawah untuk menutup (dari pegangan / judul, atau dari isi yang sudah di paling atas) */
+  let startY = null, dy = 0, t0 = 0, dragging = false;
+  panel.addEventListener("pointerdown", function (e) {
+    const fromHead = e.target.closest(".jj-sheet__grip, .jj-sheet__head") && !e.target.closest("button");
+    const body = panel.querySelector(".jj-sheet__body");
+    const fromTopOfBody = e.pointerType !== "mouse" && body.contains(e.target) && body.scrollTop <= 0 && !e.target.closest("a, button");
+    if (!fromHead && !fromTopOfBody) return;
+    startY = e.clientY; dy = 0; t0 = Date.now(); dragging = false;
+  });
+  window.addEventListener("pointermove", function (e) {
+    if (startY === null) return;
+    dy = Math.max(0, e.clientY - startY);
+    if (!dragging && dy > 6) { dragging = true; sheet.classList.add("is-dragging"); }
+    if (dragging) panel.style.transform = "translateY(" + dy + "px)";
+  });
+  function endDrag() {
+    if (startY === null) return;
+    const v = dy / Math.max(1, Date.now() - t0);
+    startY = null;
+    if (!dragging) return;
+    sheet.classList.remove("is-dragging");
+    if (dy > 110 || v > 0.6) close(true); else panel.style.transform = "";
+    dragging = false;
+  }
+  window.addEventListener("pointerup", endDrag);
+  window.addEventListener("pointercancel", endDrag);
+})();
+</script>
+<script>
+/* =====================================================================
+   v13 — Bottom Navigation Bar untuk HP & tablet (≤1180px).
+   Tema · Harga · Pesan · Video · Menu. "Menu" membuka panel menu lengkap.
+   Kelopak bunga bertebaran saat bar di-hover (mouse) atau disentuh (HP).
+   ===================================================================== */
+(function () {
+  const nav = document.getElementById("jj-bnav");
+  if (!nav) return;
+  const bar = nav.querySelector(".jj-bnav__bar");
+  const layer = nav.querySelector(".jj-bnav__petals");
+  const html = document.documentElement, body = document.body;
+  const menu = document.getElementById("menu");
+  const reduce = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  const rnd = function (a, b) { return a + Math.random() * (b - a); };
+  const COLS = ["#D8B8B2", "#E9D8D5", "#F4EAE9", "#C6A66B", "#D7C3A0", "#FFFDF9", "#A3AE8F"];
+
+  /* ---------- tebaran kelopak ---------- */
+  let lastAll = 0; const lastItem = new WeakMap();
+  function bloom(fromX, n, spread) {
+    if (reduce.matches || !layer) return;
+    const W = bar.clientWidth;
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < n; i++) {
+      const p = document.createElement("i");
+      const flower = Math.random() < .22;
+      p.className = "jj-bnav__petal" + (flower ? " is-flower" : "");
+      const x = fromX == null ? rnd(4, 96) : Math.max(2, Math.min(98, (fromX / W) * 100 + rnd(-spread, spread)));
+      p.style.cssText = "--x:" + x.toFixed(1) + "%;--s:" + rnd(7, flower ? 12 : 13).toFixed(1) + "px;--c:" + COLS[(Math.random() * COLS.length) | 0] +
+        ";--dx:" + rnd(-60, 60).toFixed(0) + "px;--rise:" + rnd(70, 170).toFixed(0) + "px;--r0:" + rnd(0, 360).toFixed(0) +
+        "deg;--d:" + rnd(1.3, 2.1).toFixed(2) + "s;--dl:" + (i * .025 + rnd(0, .12)).toFixed(2) + "s;";
+      p.addEventListener("animationend", function () { p.remove(); });
+      frag.appendChild(p);
+    }
+    layer.appendChild(frag);
+  }
+  function bloomAll() { const now = Date.now(); if (now - lastAll < 1400) return; lastAll = now; bloom(null, 22); }
+  function bloomItem(item) {
+    const now = Date.now(); if (now - (lastItem.get(item) || 0) < 700) return; lastItem.set(item, now);
+    const r = item.getBoundingClientRect(), b = bar.getBoundingClientRect();
+    bloom(r.left - b.left + r.width / 2, 12, 9);
+  }
+  bar.addEventListener("pointerenter", function (e) { if (e.pointerType === "mouse") bloomAll(); });
+  bar.addEventListener("pointerover", function (e) {
+    if (e.pointerType !== "mouse") return;
+    const it = e.target.closest(".jj-bnav__item"); if (it && !it.contains(e.relatedTarget)) bloomItem(it);
+  });
+  bar.addEventListener("pointerdown", function (e) {
+    if (e.pointerType === "mouse") return;
+    const it = e.target.closest(".jj-bnav__item"); it ? bloomItem(it) : bloomAll();
+  }, { passive: true });
+
+  /* ---------- Menu → panel menu lengkap ---------- */
+  nav.querySelector("[data-bnav-menu]").addEventListener("click", function () {
+    if (window.JJ_sheet) window.JJ_sheet.toggle();
+  });
+
+  /* ---------- status aktif ---------- */
+  function sync() {
+    let r = "";
+    if (body.classList.contains("is-order")) r = "order";
+    else if (body.classList.contains("is-catalog")) r = "tema";
+    else if (body.classList.contains("is-video")) r = "video";
+    else if (body.classList.contains("has-sheet")) r = "menu";
+    else {
+      const a = menu && menu.querySelector("a.is-active");
+      const h = a ? a.getAttribute("href") : "";
+      r = h === "#tema" ? "tema" : h === "#harga" ? "harga" : "";
+    }
+    nav.querySelectorAll(".jj-bnav__item").forEach(function (it) {
+      const on = it.dataset.route === r;
+      it.classList.toggle("is-active", on);
+      if (it.tagName === "A") { on ? it.setAttribute("aria-current", "page") : it.removeAttribute("aria-current"); }
+    });
+  }
+  if (window.MutationObserver) {
+    new MutationObserver(sync).observe(body, { attributes: true, attributeFilter: ["class"] });
+    if (menu) new MutationObserver(sync).observe(menu, { attributes: true, subtree: true, attributeFilter: ["class"] });
+  }
+  window.addEventListener("hashchange", function () { setTimeout(sync, 30); });
+
+  /* ---------- tampil setelah amplop pembuka selesai; sembunyi saat mengetik ---------- */
+  function show() {
+    if (html.classList.contains("jj-intro-active")) return;
+    requestAnimationFrame(function () { nav.classList.add("is-in"); setTimeout(bloomAll, 450); });
+  }
+  if (window.MutationObserver) new MutationObserver(show).observe(html, { attributes: true, attributeFilter: ["class"] });
+  const typing = function (el) { return el && el.matches && el.matches("input:not([type=radio]):not([type=checkbox]), textarea, select"); };
+  document.addEventListener("focusin", function (e) { if (typing(e.target)) nav.classList.add("is-hidden"); });
+  document.addEventListener("focusout", function (e) {
+    if (typing(e.target)) setTimeout(function () { if (!typing(document.activeElement)) nav.classList.remove("is-hidden"); }, 60);
+  });
+  sync(); show();
+  window.JJ_bnav = { bloom: bloomAll, sync: sync };
 })();
 </script>
 </body>
