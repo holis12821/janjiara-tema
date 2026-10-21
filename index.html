@@ -1,4 +1,5 @@
 <!doctype html>
+<!-- DIBUAT OTOMATIS dari index.php oleh tools/sinkron-index-html.sh — jangan diedit langsung. -->
 <html lang="id" class="no-js">
 <head>
   <meta charset="utf-8">
@@ -1390,9 +1391,10 @@ html, body { overflow-x: clip; }
 </head>
 <body>
 <!-- ============================== INTRO AMPLOP (v7) ==============================
-     Tampil SEKALI di kunjungan pertama, lalu langsung landing page. Tampil lagi bila pengunjung tidak
-     membuka web lebih dari JEDA_HARI hari (default 7) atau data situs/cache dihapus. Bisa dilewati (tombol / Esc),
-     tidak tampil bila pengunjung memilih "kurangi animasi", membuka #order / #katalog-tema langsung, atau browser otomatis.
+     Tampil SEKALI saja pada kunjungan pertama, lalu langsung landing page. Muat ulang (refresh),
+     tombol back/forward, atau buka halaman lagi nanti tidak memutar animasi ini lagi.
+     Bisa dilewati (tombol / Esc); tidak tampil bila pengunjung memilih "kurangi animasi",
+     membuka #order / #katalog-tema / #katalog-video langsung, atau browser otomatis.
      Paksa tampil untuk uji: tambahkan ?intro=1 di URL. -->
 <div class="jj-intro" id="jj-intro" role="dialog" aria-modal="true" aria-label="Pembuka undangan JANJIARA" hidden>
   <div class="jj-intro__sparks" aria-hidden="true"></div>
@@ -1415,41 +1417,62 @@ html, body { overflow-x: clip; }
   </div>
 </div>
 <script>
-/* Intro amplop: tampil SEKALI, lalu langsung landing page.
-   Tampil lagi bila pengunjung lebih dari JEDA_HARI hari tidak membuka web, atau data situs/cache dihapus.
-   Penanda disimpan di localStorage ("jj_intro_v1", "jj_kunjungan_terakhir"), cookie "jj_intro"
-   (umur JEDA_HARI hari, diperpanjang tiap kunjungan) dan sessionStorage.
-   Paksa tampil untuk uji: tambahkan ?intro=1 di URL. */
+/* Intro amplop: tampil SEKALI pada kunjungan pertama, sesudah itu langsung landing page.
+   Beberapa lapis penanda supaya tetap jalan walau salah satunya diblokir browser:
+     0. session PHP + cookie "jj_intro" dari server           (lihat blok PHP di baris pertama file)
+     1. localStorage "jj_intro_v1" + "jj_kunjungan_terakhir"  (penanda utama, lintas sesi)
+     2. cookie "jj_intro" dibaca dari sisi browser            (cadangan bila localStorage ditolak)
+     3. sessionStorage "jj_intro_sesi"                        (cadangan dalam satu tab)
+   Lapis terakhir tanpa penyimpanan sama sekali: jenis navigasi. Muat ulang (reload) dan tombol back/forward
+   tidak pernah memutar animasi lagi, jadi refresh tetap aman di mode penyamaran, file://,
+   atau saat cookie & penyimpanan situs dimatikan.
+   JEDA_HARI = 0 berarti sekali seumur data situs; isi mis. 7 bila ingin tampil lagi
+   setelah 7 hari tidak berkunjung. Paksa tampil untuk uji: tambahkan ?intro=1 di URL. */
 (function () {
-  var JEDA_HARI = 7;
+  var JEDA_HARI = 0;
   var el = document.getElementById("jj-intro");
-  var KEY = "jj_kunjungan_terakhir", now = Date.now(), batas = JEDA_HARI * 864e5;
+  if (!el) return;
+  var PENANDA = "jj_intro_v1", KUNJUNGAN = "jj_kunjungan_terakhir";
+  var now = Date.now(), batas = JEDA_HARI * 864e5, umurCookie = Math.round((batas || 400 * 864e5) / 1000);
   var force = /[?&]intro=1/.test(location.search);
+  /* lapis 0: penanda dari server (session PHP + cookie jj_intro), lihat blok PHP di baris pertama file */
   var seen = false;
   try {
-    var last = +localStorage.getItem(KEY) || 0;
-    seen = localStorage.getItem("jj_intro_v1") === "1" && !(last && now - last > batas);
+    var last = +localStorage.getItem(KUNJUNGAN) || 0;
+    var kedaluwarsa = batas > 0 && last > 0 && now - last > batas;
+    if (!seen) seen = localStorage.getItem(PENANDA) === "1" && !kedaluwarsa;
+    else if (kedaluwarsa) seen = false;
   } catch (e) {}
   try { if (!seen) seen = /(?:^|;\s*)jj_intro=1(?:;|$)/.test(document.cookie); } catch (e) {}
   try { if (!seen) seen = sessionStorage.getItem("jj_intro_sesi") === "1"; } catch (e) {}
 
+  /* jaring pengaman tanpa penyimpanan: muat ulang / back-forward tidak pernah memutar animasi lagi */
+  var jenisNavigasi = "";
+  try {
+    var nav = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+    if (nav && nav.type) jenisNavigasi = nav.type;
+    else if (performance.navigation) jenisNavigasi = ["navigate", "reload", "back_forward"][performance.navigation.type] || "";
+  } catch (e) {}
+  var muatUlang = jenisNavigasi === "reload" || jenisNavigasi === "back_forward";
+
   /* setiap kunjungan (termasuk saat amplop tampil) langsung dicatat sebagai "sudah dilihat" */
   var tandai = function () {
     var t = String(Date.now());
-    try { localStorage.setItem("jj_intro_v1", "1"); localStorage.setItem(KEY, t); } catch (e) {}
+    try { localStorage.setItem(PENANDA, "1"); localStorage.setItem(KUNJUNGAN, t); } catch (e) {}
     try { sessionStorage.setItem("jj_intro_sesi", "1"); } catch (e) {}
     try {
-      document.cookie = "jj_intro=1; max-age=" + Math.round(batas / 1000) + "; path=/; SameSite=Lax" +
+      document.cookie = "jj_intro=1; max-age=" + umurCookie + "; path=/; SameSite=Lax" +
         (location.protocol === "https:" ? "; Secure" : "");
     } catch (e) {}
   };
   tandai();
+  window.jjTandaiIntro = tandai;
   window.addEventListener("pagehide", tandai);
   document.addEventListener("visibilitychange", function () { if (document.hidden) tandai(); });
 
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
   var deep = /^#(order|katalog-tema|katalog-video)/.test(location.hash || "");
-  if (reduce || (!force && (seen || deep || navigator.webdriver))) return;
+  if (reduce || (!force && (seen || muatUlang || deep || navigator.webdriver))) return;
   el.hidden = false;
   document.documentElement.classList.add("jj-intro-active");
 })();
@@ -4762,7 +4785,7 @@ const JJ_PROMO = {
       sparks.appendChild(s);
     }
     let done = false;
-    const remember = function () { try { localStorage.setItem("jj_intro_v1", "1"); } catch (e) {} };
+    const remember = function () { if (window.jjTandaiIntro) window.jjTandaiIntro(); };
     const finish = function () {
       intro.hidden = true;
       html.classList.remove("jj-intro-active");

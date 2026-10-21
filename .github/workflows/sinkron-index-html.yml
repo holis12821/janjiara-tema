@@ -1,0 +1,53 @@
+# ==========================================================================
+# JANJIARA — sinkron index.html dari index.php
+# --------------------------------------------------------------------------
+# index.php adalah satu-satunya berkas landing page yang diedit manual.
+# index.html dibuat ulang otomatis dari index.php setiap kali index.php berubah,
+# supaya cadangan GitHub Pages (https://holis12821.github.io/janjiara-tema/)
+# tidak pernah tertinggal versi. GitHub Pages tidak bisa menjalankan PHP,
+# jadi hasil render PHP-nya yang disimpan sebagai HTML biasa.
+#
+# Jangan mengedit index.html langsung — perubahannya akan tertimpa.
+# Untuk menjalankan manual dari laptop: bash tools/sinkron-index-html.sh
+# ==========================================================================
+name: Sinkron index.html
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - index.php
+      - tools/sinkron-index-html.sh
+      - .github/workflows/sinkron-index-html.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sinkron-index-html
+  cancel-in-progress: false
+
+jobs:
+  sinkron:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Tampilkan versi PHP
+        run: php -v
+
+      - name: Render index.php menjadi index.html
+        run: bash tools/sinkron-index-html.sh
+
+      - name: Commit bila ada perubahan
+        run: |
+          if git diff --quiet -- index.html; then
+            echo "index.html sudah sesuai dengan index.php, tidak ada yang perlu di-commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          git commit -m "Sinkronkan index.html dari index.php (otomatis)"
+          git push

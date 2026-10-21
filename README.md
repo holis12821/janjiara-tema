@@ -17,7 +17,7 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/adat-jawa
 
 1. Simpan gambar sebagai `tema/slug.webp` (persegi, ±600×600, WebP).
 2. Commit & push, lalu buat tag baru: `git tag v1.0.1 && git push origin v1.0.1`.
-3. Di `index.html`, tambah satu baris di `JJ_TEMA`. Bila memakai tag, ubah juga
+3. Di `index.php`, tambah satu baris di `JJ_TEMA`. Bila memakai tag, ubah juga
    `TEMA_IMG` (dan `JJ_VIDEO_CFG` untuk video) ke tag baru tersebut.
 4. **Pastikan slug-nya sudah terbit** di `https://janjiaraundangan.webinvit.id/preview/SLUG`.
    Kalau 404, tombol "Preview" di kartu tema akan membuka halaman kosong.
@@ -92,7 +92,7 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-ta
    ```
 
 2. Commit & push.
-3. Di `index.html`, tambah satu baris di `JJ_VIDEO`
+3. Di `index.php`, tambah satu baris di `JJ_VIDEO`
    (cari komentar "KATALOG VIDEO UCAPAN").
 
 ## Favicon JANJIARA
@@ -114,20 +114,38 @@ Contoh di `<head>`:
 <link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-180.png">
 ```
 
-## Landing page (`index.html`)
+## Landing page (`index.php`)
 
-`index.html` adalah **satu-satunya** berkas landing page JANJIARA. Dipakai untuk dua hal
-sekaligus, jadi cukup diedit di satu tempat:
+`index.php` adalah **satu-satunya** berkas landing page yang diedit manual. Isinya HTML
+biasa; PHP hanya dipakai di blok kecil paling atas untuk penanda intro amplop
+(session + cookie), lihat bagian berikutnya.
 
-1. **GitHub Pages** — tersaji langsung di **https://holis12821.github.io/janjiara-tema/**
-2. **Dashboard webinvit** — isinya dicopy apa adanya ke halaman di dashboard
+Dipakai untuk tiga hal:
+
+1. **Hosting cPanel** — berkas utama yang dijalankan server
+2. **GitHub Pages** — tersaji di **https://holis12821.github.io/janjiara-tema/** lewat `index.html`
+3. **Dashboard webinvit** — isinya dicopy apa adanya ke halaman di dashboard
+
+### `index.html` dibuat otomatis — jangan diedit
+
+GitHub Pages tidak bisa menjalankan PHP, jadi `index.html` tetap dibutuhkan sebagai
+cadangan di sana. Berkas itu **dibuat ulang otomatis** dari `index.php` oleh
+`.github/workflows/sinkron-index-html.yml` setiap kali `index.php` di-push ke `main`.
+
+- Edit `index.php` saja. Perubahan yang ditulis langsung ke `index.html` akan tertimpa.
+- Menjalankan manual dari laptop: `bash tools/sinkron-index-html.sh`
+- Sumbernya satu, jadi tidak ada lagi dua berkas yang bisa beda versi — masalah yang
+  dulu terjadi pada salinan `janjiara-landing-page.html` dan sudah dihapus.
+
+### Catatan landing page
 
 - Tetap bisa dibuka walaupun server webinvit sedang gangguan: favicon ditanam inline
   (data URI), gambar tema & video diambil dari repo ini lewat jsDelivr, jadi halamannya
   mandiri dan tidak bergantung pada webinvit.
 - Tombol pesan, katalog tema, dan pilihan paket tetap mengarah ke WhatsApp admin; menu Masuk dan preview tema tetap ke `janjiaradigital.webinvit.id`.
 - `.nojekyll` memastikan file disajikan apa adanya.
-- Dulu ada salinan kedua (`janjiara-landing-page.html`) yang isinya identik. Salinan itu
-  dihapus karena pernah tertinggal satu versi dan harus disamakan manual.
+- Membuka `index.php` dengan klik dua kali (`file://`) tidak lagi bekerja — PHP butuh
+  server. Untuk melihat hasilnya di laptop: `php -S localhost:8000 -t .` lalu buka
+  <http://localhost:8000/>.
 
 Aktifkan sekali: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `(root)` → Save.**
