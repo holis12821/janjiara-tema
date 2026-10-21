@@ -1391,9 +1391,8 @@ html, body { overflow-x: clip; }
 </head>
 <body>
 <!-- ============================== INTRO AMPLOP (v7) ==============================
-     Tampil di kunjungan pertama, lalu tampil lagi bila pengunjung tidak membuka web lebih dari
-     JEDA_HARI hari (default 7). Disimpan di localStorage: "jj_intro_v1" (sudah membuka amplop) dan
-     "jj_kunjungan_terakhir" (waktu kunjungan terakhir). Bisa dilewati (tombol / Esc),
+     Tampil SEKALI di kunjungan pertama, lalu langsung landing page. Tampil lagi bila pengunjung tidak
+     membuka web lebih dari JEDA_HARI hari (default 7) atau data situs/cache dihapus. Bisa dilewati (tombol / Esc),
      tidak tampil bila pengunjung memilih "kurangi animasi", membuka #order / #katalog-tema langsung, atau browser otomatis.
      Paksa tampil untuk uji: tambahkan ?intro=1 di URL. -->
 <div class="jj-intro" id="jj-intro" role="dialog" aria-modal="true" aria-label="Pembuka undangan JANJIARA" hidden>
@@ -1417,22 +1416,40 @@ html, body { overflow-x: clip; }
   </div>
 </div>
 <script>
+/* Intro amplop: tampil SEKALI, lalu langsung landing page.
+   Tampil lagi bila pengunjung lebih dari JEDA_HARI hari tidak membuka web, atau data situs/cache dihapus.
+   Penanda disimpan di localStorage ("jj_intro_v1", "jj_kunjungan_terakhir"), cookie "jj_intro"
+   (umur JEDA_HARI hari, diperpanjang tiap kunjungan) dan sessionStorage.
+   Paksa tampil untuk uji: tambahkan ?intro=1 di URL. */
 (function () {
-  var JEDA_HARI = 7;   /* tampilkan lagi bila lebih dari 7 hari tidak membuka web */
-  var el = document.getElementById("jj-intro"), seen = false, force = /[?&]intro=1/.test(location.search);
-  var KEY = "jj_kunjungan_terakhir", now = Date.now();
+  var JEDA_HARI = 7;
+  var el = document.getElementById("jj-intro");
+  var KEY = "jj_kunjungan_terakhir", now = Date.now(), batas = JEDA_HARI * 864e5;
+  var force = /[?&]intro=1/.test(location.search);
+  var seen = false;
   try {
-    seen = localStorage.getItem("jj_intro_v1") === "1";
     var last = +localStorage.getItem(KEY) || 0;
-    if (seen && last && now - last > JEDA_HARI * 864e5) { seen = false; localStorage.removeItem("jj_intro_v1"); }
-    localStorage.setItem(KEY, String(now));
+    seen = localStorage.getItem("jj_intro_v1") === "1" && !(last && now - last > batas);
   } catch (e) {}
-  /* catat waktu terakhir halaman dibuka/ditinggalkan, supaya "lama tidak berkunjung" dihitung dari kunjungan terakhir */
-  var catat = function () { try { localStorage.setItem(KEY, String(Date.now())); } catch (e) {} };
-  window.addEventListener("pagehide", catat);
-  document.addEventListener("visibilitychange", function () { if (document.hidden) catat(); });
+  try { if (!seen) seen = /(?:^|;\s*)jj_intro=1(?:;|$)/.test(document.cookie); } catch (e) {}
+  try { if (!seen) seen = sessionStorage.getItem("jj_intro_sesi") === "1"; } catch (e) {}
+
+  /* setiap kunjungan (termasuk saat amplop tampil) langsung dicatat sebagai "sudah dilihat" */
+  var tandai = function () {
+    var t = String(Date.now());
+    try { localStorage.setItem("jj_intro_v1", "1"); localStorage.setItem(KEY, t); } catch (e) {}
+    try { sessionStorage.setItem("jj_intro_sesi", "1"); } catch (e) {}
+    try {
+      document.cookie = "jj_intro=1; max-age=" + Math.round(batas / 1000) + "; path=/; SameSite=Lax" +
+        (location.protocol === "https:" ? "; Secure" : "");
+    } catch (e) {}
+  };
+  tandai();
+  window.addEventListener("pagehide", tandai);
+  document.addEventListener("visibilitychange", function () { if (document.hidden) tandai(); });
+
   var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
-  var deep = /^#(order|katalog-tema)/.test(location.hash || "");
+  var deep = /^#(order|katalog-tema|katalog-video)/.test(location.hash || "");
   if (reduce || (!force && (seen || deep || navigator.webdriver))) return;
   el.hidden = false;
   document.documentElement.classList.add("jj-intro-active");
