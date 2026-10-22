@@ -63,6 +63,17 @@ deployment:
     # --- aset: gambar tema, video ucapan, poster, logo, QRIS -------------
     - /bin/cp -Rf tema video brand assets "$DEPLOYPATH/"
 
+    # --- penanda versi yang sedang tayang ---------------------------------
+    # Menulis commit yang baru saja dideploy ke sebuah berkas teks kecil di
+    # document root. Gunanya: dari luar, tanpa akses apa pun ke server, bisa
+    # langsung dicek versi mana yang benar-benar tayang —
+    #   curl https://janjiara.com/assets/deploy-check.txt
+    # Tanpa ini, perubahan yang tidak kelihatan di halaman (misalnya hanya
+    # menyentuh tools/ atau README) mustahil diverifikasi dari luar.
+    # "|| echo" dipasang supaya deploy tidak ikut gagal kalau git tidak ada.
+    - /bin/sh -c "git rev-parse HEAD 2>/dev/null || echo tidak-diketahui" > "$DEPLOYPATH/assets/deploy-check.txt"
+    - /bin/date -u "+%Y-%m-%d %H:%M:%S UTC" >> "$DEPLOYPATH/assets/deploy-check.txt"
+
     # --- izin baca untuk Apache ------------------------------------------
     # Folder 700 / berkas 600 membuat Apache membalas 403 (penyebab QRIS
     # tidak tampil sebelumnya). Mode simbolik "u+rwX,go+rX,go-w" memberi
@@ -78,6 +89,7 @@ deployment:
     - test -f "$DEPLOYPATH/.htaccess"
     - test -f "$DEPLOYPATH/tema/adat-jawa.webp"
     - test -f "$DEPLOYPATH/assets/qris-shopeepay.png"
+    - test -s "$DEPLOYPATH/assets/deploy-check.txt"
     - test -f "$DEPLOYPATH/assets/pay/bca.webp"
     - test -f "$DEPLOYPATH/video/poster/natal-tahun-baru-001.webp"
     - echo "Deploy JANJIARA selesai. Document root:" "$DEPLOYPATH"

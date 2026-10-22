@@ -75,7 +75,11 @@ fi
 # --- jalankan aturan .cpanel.yml ------------------------------------------
 # Daftar tugas dibaca langsung dari .cpanel.yml supaya tidak ada aturan
 # penyalinan yang ditulis dua kali di dua berkas berbeda.
-tugas=$(sed -n '/^ *tasks:/,$ s/^ *- //p' .cpanel.yml)
+# Kutip pembungkus YAML (kalau suatu saat ada tugas yang ditulis dengan
+# tanda kutip) dilucuti juga — tanpa itu sh akan mengira seluruh barisnya
+# adalah satu nama perintah.
+tugas=$(sed -n '/^ *tasks:/,$ s/^ *- //p' .cpanel.yml \
+        | sed -e "s/^'\(.*\)'$/\1/" -e 's/^"\(.*\)"$/\1/')
 if [ -z "$tugas" ]; then
   catat "GAGAL: tidak ada tugas yang terbaca dari .cpanel.yml"
   exit 1

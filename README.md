@@ -274,6 +274,29 @@ dipakai kapan saja sebagai cadangan manual.
 Ada pengunci (`~/.janjiara-deploy.lock`) supaya dua deploy tidak pernah jalan
 bersamaan kalau satu deploy kebetulan lebih lama dari 5 menit.
 
+### Memastikan versi mana yang tayang
+
+Dari mana pun, tanpa akses ke server:
+
+```bash
+curl https://janjiara.com/assets/deploy-check.txt
+```
+
+Balasannya commit yang sedang tayang dan waktu deploy-nya:
+
+```
+dd6f00312e7808b644837e914d73581fd834360c
+2026-10-22 16:14:48 UTC
+```
+
+Bandingkan dengan `git rev-parse HEAD` di laptop. Kalau sama, situs sudah
+mutakhir. Berkas ini ditulis ulang setiap deploy oleh `.cpanel.yml`, jadi
+berlaku baik untuk deploy lewat cron maupun lewat tombol di cPanel.
+
+Ini penting karena banyak perubahan tidak kelihatan dari halaman depan —
+misalnya yang hanya menyentuh `tools/` atau `README.md`. Tanpa penanda ini,
+mustahil memastikan dari luar apakah cron benar-benar jalan.
+
 ### Melihat hasilnya
 
 Log ada di `~/janjiara-deploy.log` (buka lewat cPanel » *File Manager*,
