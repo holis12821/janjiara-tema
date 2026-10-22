@@ -214,79 +214,95 @@ membalas `404` — bukan dibelokkan ke `/`.
 
 ## Deploy otomatis dari GitHub
 
-Sejak workflow `.github/workflows/deploy-cpanel.yml` dipasang, **cukup `git push`
-dari laptop** — janjiara.com ikut berubah sendiri dalam satu sampai dua menit.
-Tidak perlu lagi unggah berkas manual, tidak perlu lagi membuka cPanel untuk
-menekan *Update from Remote* dan *Deploy HEAD Commit*.
+Setelah disiapkan, **cukup `git push` dari laptop** — janjiara.com ikut berubah
+sendiri paling lama 5 menit kemudian. Tidak ada lagi unggah berkas manual,
+tidak ada lagi klik *Update from Remote* dan *Deploy HEAD Commit* di cPanel.
 
-Jalurnya tetap murni PHP. GitHub hanya mengirim berkas lewat SSH; yang
-menyajikan situs tetap Apache + PHP di hosting. Tidak ada Node.js di server.
+### Kenapa caranya begini, bukan lewat GitHub Actions
+
+Hosting janjiara.com (Rumahweb, paket shared) **tidak membuka port SSH**.
+Hasil pemeriksaan 22 Oktober 2026: port 22, 2222, 2200, 2211, 7822, 65002,
+64000, 18765, 2020 dan 2022 semuanya tertutup; yang terbuka hanya 80, 443
+dan 2083. Di cPanel pun tidak ada menu *SSH Access*, hanya *Git Version Control*.
+
+Artinya GitHub tidak punya jalan masuk ke server — pendekatan apa pun yang
+mengandalkan GitHub Actions menyambung ke hosting pasti gagal. Jadi arah
+pemicunya dibalik:
 
 ```
-laptop  --git push-->  GitHub  --SSH-->  repo Git cPanel  --.cpanel.yml-->  public_html
+laptop --git push--> GitHub <--git fetch-- Cron Job cPanel --.cpanel.yml--> public_html
+                               (server yang menarik, tiap 5 menit)
 ```
+
+Ini juga sebabnya **tidak perlu kunci SSH, tidak perlu GitHub Secrets, dan
+tidak perlu token apa pun**. Repo ini publik, jadi server cukup menariknya.
 
 ### Penyiapan sekali saja
 
-**1. Buat kunci SSH khusus deploy** (di laptop, jangan pakai kunci pribadi):
+**1. Repo sudah ada di cPanel** — menu *Git Version Control*, hasil clone dari
+`https://github.com/holis12821/janjiara-tema.git`. Catat *Repository Path*-nya;
+yang dipakai di bawah ini `/home/jank1853/repositories/janjiara-tema`.
 
-```bash
-ssh-keygen -t ed25519 -C "github-deploy-janjiara" -f ~/.ssh/janjiara_deploy -N ""
+**2. Buat Cron Job** — cPanel » *Cron Jobs* (bagian *Advanced*).
+
+- *Common Settings*: pilih **Every 5 Minutes** (`*/5 * * * *`)
+- *Command*: tempel satu baris ini
+
+```
+/bin/sh /home/jank1853/repositories/janjiara-tema/tools/deploy-cron.sh
 ```
 
-Menghasilkan dua berkas: `janjiara_deploy` (rahasia) dan `janjiara_deploy.pub` (publik).
+Klik **Add New Cron Job**. Selesai — tidak ada langkah lain.
 
-**2. Daftarkan kunci publik di cPanel** — menu *SSH Access* » *Manage SSH Keys* »
-*Import Key*. Tempel isi `~/.ssh/janjiara_deploy.pub` ke kolom **Public Key**,
-kosongkan kolom private key, simpan, lalu klik **Manage** » **Authorize**.
-Tanpa langkah *Authorize* kuncinya terdaftar tapi tidak berlaku.
+**3. Uji** — ubah apa saja, `git push`, tunggu sampai 5 menit, buka janjiara.com.
 
-**3. Pastikan repo Git ada di cPanel** — menu *Git Version Control*. Kalau belum
-ada, buat repo dengan *Repository Path* `repositories/janjiara-tema` (boleh
-di-clone dari GitHub, boleh repo kosong — workflow akan mengisinya). Yang penting
-jalurnya cocok dengan `REPO_PATH` di workflow.
+### Cara kerjanya
 
-**4. Isi secrets di GitHub** — repo » *Settings* » *Secrets and variables* »
-*Actions* » *New repository secret*:
+Setiap 5 menit `tools/deploy-cron.sh` dijalankan, lalu:
 
-| Nama secret | Isi | Wajib |
-|---|---|---|
-| `CPANEL_SSH_KEY` | seluruh isi `~/.ssh/janjiara_deploy`, termasuk baris `-----BEGIN...` dan `-----END...` | ya |
-| `CPANEL_HOST` | `janjiara.com`, atau hostname server dari cPanel kalau domain tidak menerima SSH | ya |
-| `CPANEL_USER` | `jank1853` | ya |
-| `CPANEL_SSH_PORT` | nomor port SSH hosting; **lewati kalau portnya 22** | tidak |
+1. `git fetch` ke GitHub, bandingkan commit server dengan commit `main`.
+2. **Kalau sama, berhenti tanpa melakukan apa-apa** — tidak menyalin berkas,
+   tidak menulis log. Jadi cron tiap 5 menit tidak membebani hosting.
+3. Kalau ada commit baru: `git reset --hard origin/main`, lalu menjalankan
+   daftar tugas yang dibaca **langsung dari `.cpanel.yml`**.
 
-Banyak hosting Indonesia memakai port SSH selain 22. Nomornya tertulis di
-cPanel » *SSH Access*, atau di email aktivasi hosting.
+Poin ketiga itu disengaja: perintah penyalinan berkas tidak ditulis ulang di
+skrip. `.cpanel.yml` tetap satu-satunya tempat aturan deploy, jadi tombol
+*Deploy HEAD Commit* di cPanel memberi hasil yang persis sama dan tetap bisa
+dipakai kapan saja sebagai cadangan manual.
 
-**5. Uji coba** — tab *Actions* di GitHub » *Deploy ke cPanel* » **Run workflow**.
-Jalankan sekali tanpa push dulu, supaya kalau ada secret yang salah ketahuan
-sebelum menyentuh kode.
+Ada pengunci (`~/.janjiara-deploy.lock`) supaya dua deploy tidak pernah jalan
+bersamaan kalau satu deploy kebetulan lebih lama dari 5 menit.
 
-### Apa yang dilakukan workflow
+### Melihat hasilnya
 
-1. Mengambil isi `main` terbaru.
-2. Mengirimnya lewat SSH ke repo Git di cPanel (`git push --force`). Dipakai
-   `--force` karena repo cPanel itu tujuan deploy, bukan sumber kebenaran —
-   yang berlaku selalu isi `main` di GitHub.
-3. Memicu deploy cPanel lewat `uapi VersionControlDeployment create`, yang
-   menjalankan aturan di `.cpanel.yml` seperti biasa.
-4. Memeriksa `https://janjiara.com` sampai 3 menit: harus membalas `200` **dan**
-   memuat judul halaman JANJIARA. Kalau tidak, workflow ditandai merah.
+Log ada di `~/janjiara-deploy.log` (buka lewat cPanel » *File Manager*,
+di folder home, bukan di `public_html`). Isinya hanya deploy yang benar-benar
+terjadi:
 
-Karena `.cpanel.yml` tetap jadi satu-satunya aturan penyalinan berkas, tombol
-*Deploy HEAD Commit* di cPanel juga masih berfungsi seperti dulu sebagai cadangan.
+```
+2026-10-22 22:59:20  Commit baru: 22729be -> 8a96142
+2026-10-22 22:59:21  BERHASIL deploy 8a96142
+    Document root ditemukan: /home/jank1853/public_html
+    Deploy JANJIARA selesai. Document root: /home/jank1853/public_html
+```
 
-### Kalau deploy gagal
+Log dipangkas otomatis kalau sudah lebih dari 500 baris.
 
-| Pesan di log Actions | Artinya |
+### Kalau tidak jalan
+
+| Isi log | Artinya |
 |---|---|
-| `Permission denied (publickey)` | kunci belum di-*Authorize* di cPanel, atau `CPANEL_USER` salah |
-| `Tidak bisa menghubungi ... port` | port SSH salah, atau IP GitHub diblokir firewall hosting |
-| `Repo tidak ada di /home/...` | repo belum dibuat di *Git Version Control*, atau jalurnya beda |
-| `Gagal memicu deploy cPanel` | `uapi` tidak tersedia; deploy masih bisa dijalankan manual dari cPanel |
-| `janjiara.com tidak membalas 200` | cek riwayat deploy di cPanel, dan pastikan tidak ada aplikasi Node.js yang merebut domain |
+| log tidak pernah dibuat | cron belum jalan — cek penulisan *Command*, dan pastikan *Repository Path* cocok |
+| `GAGAL: repo tidak ada di ...` | jalur repo berbeda; sesuaikan baris `REPO=` di `tools/deploy-cron.sh` |
+| `GAGAL: perintah git tidak ditemukan` | git tidak ada di PATH cron; tambahkan jalurnya di bagian `PATH=` skrip |
+| `GAGAL: tidak bisa menghubungi GitHub` | hosting memblokir keluar ke github.com — hubungi Rumahweb |
+| `GAGAL saat menjalankan tugas` | baris `test -f` di `.cpanel.yml` gagal; berkas yang disebut belum di-commit |
 
-Berkas baru (misalnya gambar tema atau logo pembayaran) hanya ikut terkirim
-kalau sudah di-`git add` dan di-commit. `git status` yang bersih sebelum push
-adalah syaratnya.
+Berkas baru (gambar tema, logo pembayaran) hanya ikut terdeploy kalau sudah
+di-`git add` dan di-commit. Pastikan `git status` bersih sebelum push.
+
+### Kalau ingin deploy instan (opsional)
+
+5 menit terasa lama? Perkecil jadwal cron jadi *Every Minute* (`* * * * *`).
+Karena skrip langsung berhenti saat tidak ada commit baru, bebannya tetap kecil.
