@@ -211,3 +211,82 @@ memperlakukan `/cgi-bin/` serta metode non-GET secara berbeda.
 Setelah itu, penanda bahwa PHP benar-benar jalan: `https://janjiara.com/favicon.ico`
 membalas `200 image/x-icon` (aturan dari `.htaccess`), dan `https://janjiara.com/index`
 membalas `404` — bukan dibelokkan ke `/`.
+
+## Deploy otomatis dari GitHub
+
+Sejak workflow `.github/workflows/deploy-cpanel.yml` dipasang, **cukup `git push`
+dari laptop** — janjiara.com ikut berubah sendiri dalam satu sampai dua menit.
+Tidak perlu lagi unggah berkas manual, tidak perlu lagi membuka cPanel untuk
+menekan *Update from Remote* dan *Deploy HEAD Commit*.
+
+Jalurnya tetap murni PHP. GitHub hanya mengirim berkas lewat SSH; yang
+menyajikan situs tetap Apache + PHP di hosting. Tidak ada Node.js di server.
+
+```
+laptop  --git push-->  GitHub  --SSH-->  repo Git cPanel  --.cpanel.yml-->  public_html
+```
+
+### Penyiapan sekali saja
+
+**1. Buat kunci SSH khusus deploy** (di laptop, jangan pakai kunci pribadi):
+
+```bash
+ssh-keygen -t ed25519 -C "github-deploy-janjiara" -f ~/.ssh/janjiara_deploy -N ""
+```
+
+Menghasilkan dua berkas: `janjiara_deploy` (rahasia) dan `janjiara_deploy.pub` (publik).
+
+**2. Daftarkan kunci publik di cPanel** — menu *SSH Access* » *Manage SSH Keys* »
+*Import Key*. Tempel isi `~/.ssh/janjiara_deploy.pub` ke kolom **Public Key**,
+kosongkan kolom private key, simpan, lalu klik **Manage** » **Authorize**.
+Tanpa langkah *Authorize* kuncinya terdaftar tapi tidak berlaku.
+
+**3. Pastikan repo Git ada di cPanel** — menu *Git Version Control*. Kalau belum
+ada, buat repo dengan *Repository Path* `repositories/janjiara-tema` (boleh
+di-clone dari GitHub, boleh repo kosong — workflow akan mengisinya). Yang penting
+jalurnya cocok dengan `REPO_PATH` di workflow.
+
+**4. Isi secrets di GitHub** — repo » *Settings* » *Secrets and variables* »
+*Actions* » *New repository secret*:
+
+| Nama secret | Isi | Wajib |
+|---|---|---|
+| `CPANEL_SSH_KEY` | seluruh isi `~/.ssh/janjiara_deploy`, termasuk baris `-----BEGIN...` dan `-----END...` | ya |
+| `CPANEL_HOST` | `janjiara.com`, atau hostname server dari cPanel kalau domain tidak menerima SSH | ya |
+| `CPANEL_USER` | `jank1853` | ya |
+| `CPANEL_SSH_PORT` | nomor port SSH hosting; **lewati kalau portnya 22** | tidak |
+
+Banyak hosting Indonesia memakai port SSH selain 22. Nomornya tertulis di
+cPanel » *SSH Access*, atau di email aktivasi hosting.
+
+**5. Uji coba** — tab *Actions* di GitHub » *Deploy ke cPanel* » **Run workflow**.
+Jalankan sekali tanpa push dulu, supaya kalau ada secret yang salah ketahuan
+sebelum menyentuh kode.
+
+### Apa yang dilakukan workflow
+
+1. Mengambil isi `main` terbaru.
+2. Mengirimnya lewat SSH ke repo Git di cPanel (`git push --force`). Dipakai
+   `--force` karena repo cPanel itu tujuan deploy, bukan sumber kebenaran —
+   yang berlaku selalu isi `main` di GitHub.
+3. Memicu deploy cPanel lewat `uapi VersionControlDeployment create`, yang
+   menjalankan aturan di `.cpanel.yml` seperti biasa.
+4. Memeriksa `https://janjiara.com` sampai 3 menit: harus membalas `200` **dan**
+   memuat judul halaman JANJIARA. Kalau tidak, workflow ditandai merah.
+
+Karena `.cpanel.yml` tetap jadi satu-satunya aturan penyalinan berkas, tombol
+*Deploy HEAD Commit* di cPanel juga masih berfungsi seperti dulu sebagai cadangan.
+
+### Kalau deploy gagal
+
+| Pesan di log Actions | Artinya |
+|---|---|
+| `Permission denied (publickey)` | kunci belum di-*Authorize* di cPanel, atau `CPANEL_USER` salah |
+| `Tidak bisa menghubungi ... port` | port SSH salah, atau IP GitHub diblokir firewall hosting |
+| `Repo tidak ada di /home/...` | repo belum dibuat di *Git Version Control*, atau jalurnya beda |
+| `Gagal memicu deploy cPanel` | `uapi` tidak tersedia; deploy masih bisa dijalankan manual dari cPanel |
+| `janjiara.com tidak membalas 200` | cek riwayat deploy di cPanel, dan pastikan tidak ada aplikasi Node.js yang merebut domain |
+
+Berkas baru (misalnya gambar tema atau logo pembayaran) hanya ikut terkirim
+kalau sudah di-`git add` dan di-commit. `git status` yang bersih sebelum push
+adalah syaratnya.

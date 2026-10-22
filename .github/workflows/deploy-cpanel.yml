@@ -1,0 +1,157 @@
+# ==========================================================================
+# JANJIARA — deploy otomatis ke cPanel
+# --------------------------------------------------------------------------
+# Tujuan: cukup "git push" dari laptop, janjiara.com langsung ikut berubah.
+# Tidak ada lagi unggah berkas manual, tidak ada lagi klik tombol di cPanel.
+#
+# Alur satu kali push:
+#   1. GitHub Actions ambil kode terbaru
+#   2. kode dikirim lewat SSH ke repo Git milik cPanel (~/repositories/...)
+#   3. cPanel menjalankan .cpanel.yml -> menyalin berkas ke public_html
+#   4. janjiara.com dicek: harus balas HTTP 200 dan memuat judul JANJIARA
+#
+# PENTING — ini tetap 100% PHP. Node.js hanya dipakai GitHub di komputer
+# mereka sendiri untuk menjalankan actions/checkout; di hosting tidak ada
+# Node sama sekali, yang menyajikan situs tetap Apache + PHP.
+# Lihat bagian "Hosting: PHP via cPanel, BUKAN Node.js" di README.md.
+#
+# Cara menyiapkan kunci SSH dan secrets: lihat "Deploy otomatis dari GitHub"
+# di README.md. Tanpa secrets itu workflow ini akan gagal di langkah SSH.
+# ==========================================================================
+name: Deploy ke cPanel
+
+on:
+  push:
+    branches: [main]
+
+  # index.html dibuat ulang oleh workflow "Sinkron index.html", dan commit
+  # robotnya TIDAK memicu event push (aturan GitHub: push memakai
+  # GITHUB_TOKEN tidak menjalankan workflow lain). Tanpa pemicu ini,
+  # index.html di server akan tertinggal satu versi setiap kali index.php
+  # diubah. Jadi deploy juga dijalankan setelah sinkron selesai.
+  workflow_run:
+    workflows: ["Sinkron index.html"]
+    types: [completed]
+
+  # Tombol "Run workflow" di tab Actions — untuk deploy ulang tanpa push.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Satu deploy pada satu waktu. Push beruntun tidak saling menimpa di
+# tengah penyalinan berkas.
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: false
+
+env:
+  # Ubah di sini kalau akun hosting atau letak repo berpindah.
+  REPO_PATH: /home/jank1853/repositories/janjiara-tema
+  SITE_URL: https://janjiara.com/
+  # Penanda yang wajib ada di halaman hasil deploy. Kalau janjiara.com
+  # membalas 200 tapi tanpa teks ini, berarti yang tampil bukan halaman kita.
+  PENANDA: 'JANJIARA — Undangan Digital'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    # Kalau sinkron index.html gagal, jangan deploy hasil yang rusak.
+    if: github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success'
+
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+        with:
+          # Repo cPanel menerima kiriman commit, jadi riwayat harus utuh.
+          # Shallow clone tidak bisa di-push.
+          fetch-depth: 0
+          ref: main
+
+      - name: Siapkan kunci SSH
+        env:
+          KUNCI: ${{ secrets.CPANEL_SSH_KEY }}
+          HOST: ${{ secrets.CPANEL_HOST }}
+          PORT: ${{ secrets.CPANEL_SSH_PORT || '22' }}
+        run: |
+          set -euo pipefail
+          test -n "$KUNCI" || { echo "::error::Secret CPANEL_SSH_KEY belum diisi."; exit 1; }
+          test -n "$HOST"  || { echo "::error::Secret CPANEL_HOST belum diisi."; exit 1; }
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "$KUNCI" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -p "$PORT" -H "$HOST" >> ~/.ssh/known_hosts 2>/dev/null
+          test -s ~/.ssh/known_hosts || { echo "::error::Tidak bisa menghubungi $HOST port $PORT."; exit 1; }
+
+      - name: Kirim kode ke repo Git cPanel
+        env:
+          HOST: ${{ secrets.CPANEL_HOST }}
+          PORT: ${{ secrets.CPANEL_SSH_PORT || '22' }}
+          PENGGUNA: ${{ secrets.CPANEL_USER }}
+        run: |
+          set -euo pipefail
+          test -n "$PENGGUNA" || { echo "::error::Secret CPANEL_USER belum diisi."; exit 1; }
+          SSH="ssh -i $HOME/.ssh/id_deploy -p $PORT -o BatchMode=yes"
+
+          # Pohon kerja di server dibuat bersih dulu. Git menolak menerima
+          # kiriman ke cabang yang sedang di-checkout bila ada perubahan
+          # yang belum di-commit di sana.
+          $SSH "$PENGGUNA@$HOST" "
+            set -e
+            test -d '$REPO_PATH/.git' || { echo 'Repo tidak ada di $REPO_PATH'; exit 1; }
+            git -C '$REPO_PATH' config receive.denyCurrentBranch updateInstead
+            git -C '$REPO_PATH' reset --hard
+          "
+
+          # --force karena repo cPanel adalah tujuan deploy, bukan sumber
+          # kebenaran. Yang berlaku selalu isi main di GitHub.
+          git remote add cpanel "ssh://$PENGGUNA@$HOST:$PORT$REPO_PATH"
+          GIT_SSH_COMMAND="ssh -i $HOME/.ssh/id_deploy -o BatchMode=yes" \
+            git push --force cpanel HEAD:refs/heads/main
+
+      - name: Jalankan deploy cPanel (.cpanel.yml)
+        env:
+          HOST: ${{ secrets.CPANEL_HOST }}
+          PORT: ${{ secrets.CPANEL_SSH_PORT || '22' }}
+          PENGGUNA: ${{ secrets.CPANEL_USER }}
+        run: |
+          set -uo pipefail
+          SSH="ssh -i $HOME/.ssh/id_deploy -p $PORT -o BatchMode=yes"
+
+          hasil=$($SSH "$PENGGUNA@$HOST" "
+            PATH=\$PATH:/usr/local/cpanel/bin
+            uapi --output=jsonpretty VersionControlDeployment create \
+              repository_root='$REPO_PATH'
+          " 2>&1) || true
+          echo "$hasil"
+
+          if echo "$hasil" | grep -qE '"errors" *: *null'; then
+            echo "Deploy masuk antrean cPanel."
+          elif echo "$hasil" | grep -qiE 'in progress|already|queued'; then
+            # Kiriman commit tadi bisa saja sudah memicu deploy sendiri.
+            echo "::warning::Sudah ada deploy berjalan — dianggap berhasil."
+          else
+            echo "::error::Gagal memicu deploy cPanel. Lihat keluaran di atas."
+            exit 1
+          fi
+
+      - name: Verifikasi janjiara.com
+        run: |
+          set -uo pipefail
+          # Deploy cPanel berjalan di belakang layar, beri waktu sampai 3 menit.
+          for ke in $(seq 1 18); do
+            kode=$(curl -s -o /tmp/halaman.html -w '%{http_code}' --max-time 20 \
+                   "${SITE_URL}?nocache=${GITHUB_SHA}" || echo 000)
+            if [ "$kode" = "200" ] && grep -q "$PENANDA" /tmp/halaman.html; then
+              echo "Berhasil: janjiara.com tayang (HTTP 200, $(wc -c < /tmp/halaman.html) bytes)."
+              exit 0
+            fi
+            echo "percobaan $ke: HTTP $kode — tunggu 10 detik"
+            sleep 10
+          done
+          echo "::error::janjiara.com tidak membalas 200 dengan isi yang benar setelah 3 menit."
+          echo "Cek cPanel » Git Version Control » riwayat deploy, dan pastikan"
+          echo "tidak ada aplikasi Node.js yang merebut domain (lihat README.md)."
+          exit 1
