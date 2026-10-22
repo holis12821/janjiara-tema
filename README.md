@@ -1,37 +1,39 @@
 # janjiara-tema
 
-Gambar thumbnail katalog tema undangan digital **JANJIARA** (WebP 600×600), dipakai oleh landing page lewat jsDelivr CDN.
+Gambar thumbnail katalog tema undangan digital **JANJIARA** (WebP 600×600), dipakai oleh landing page.
+
+Sejak v10 **semua aset di-host sendiri** di hosting cPanel `janjiara.com` — tidak lagi lewat
+jsDelivr/CDN GitHub. Folder `tema/`, `video/`, `video/poster/`, `brand/` dan `assets/`
+diunggah ke hosting bersama `index.php`.
 
 ## Format link
 
 ```
-https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/tema/SLUG.webp
+https://janjiara.com/tema/SLUG.webp
 ```
 
-Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/tema/adat-jawa.webp
+Contoh: https://janjiara.com/tema/adat-jawa.webp
 
 - `SLUG` = nama file tema, huruf kecil, tanda hubung tetap (sama dengan slug preview `https://janjiaraundangan.webinvit.id/preview/SLUG`).
-- `VERSI` = tag rilis (mis. `v1.0.0`). Link dengan tag di-cache permanen oleh jsDelivr, jadi cepat dan stabil.
+- Alamat dasar diatur di satu tempat: konstanta `JJ_CDN` di `index.php` (cari `const JJ_CDN`).
+  Ganti domain cukup di baris itu.
 
 ## Menambah tema baru
 
 1. Simpan gambar sebagai `tema/slug.webp` (persegi, ±600×600, WebP).
-2. Commit & push, lalu buat tag baru: `git tag v1.0.1 && git push origin v1.0.1`.
-3. Di `index.php`, tambah satu baris di `JJ_TEMA`. Bila memakai tag, ubah juga
-   `TEMA_IMG` (dan `JJ_VIDEO_CFG` untuk video) ke tag baru tersebut.
+2. Di `index.php`, tambah satu baris di `JJ_TEMA`.
+3. Unggah `tema/slug.webp` ke folder `tema/` di hosting cPanel, lalu commit & push.
+   Tidak ada cache CDN lagi — gambar langsung tampil begitu file ada di hosting.
 4. **Pastikan slug-nya sudah terbit** di `https://janjiaraundangan.webinvit.id/preview/SLUG`.
    Kalau 404, tombol "Preview" di kartu tema akan membuka halaman kosong.
 
-## Repo ini harus tetap publik
+## Visibilitas repo
 
-jsDelivr **tidak melayani repo privat**. Begitu repo ini diprivatkan, seluruh gambar
-tema dan video di landing page hilang (hanya file yang kebetulan masih ter-cache yang
-bertahan), dan GitHub Pages ikut mati. Dokumen bisnis karena itu disimpan di luar repo,
-bukan dengan mengubah visibilitas repo.
+Landing page **tidak lagi bergantung pada visibilitas repo**: sejak aset di-host sendiri
+di `janjiara.com`, memprivatkan repo tidak lagi merusak gambar tema atau video.
+Yang ikut mati bila repo diprivat hanyalah cadangan GitHub Pages.
 
-Catatan: jsDelivr juga menyimpan jawaban 404. Bila repo sempat diprivat, jalur tag yang
-sedang dipakai bisa terus 404 walau sudah dipublikkan lagi dan di-purge. Jalur `@main`
-biasanya pulih lebih dulu.
+Dokumen bisnis tetap disimpan di luar repo (lihat `.gitignore`).
 
 ## Tema yang dihapus (18 Oktober 2026)
 
@@ -66,11 +68,11 @@ Folder `video/` berisi contoh video ucapan (MP4 H.264, vertikal 9:16, 540x960) b
 poster thumbnail-nya di `video/poster/` (WebP 540x960).
 
 ```
-Video  : https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/video/SLUG.mp4
-Poster : https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@VERSI/video/poster/SLUG.webp
+Video  : video/SLUG.mp4                              (relatif terhadap halaman)
+Poster : https://janjiara.com/video/poster/SLUG.webp
 ```
 
-Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-tahun-baru-001.mp4
+Contoh: https://janjiara.com/video/natal-tahun-baru-001.mp4
 
 | Slug | Kategori |
 |---|---|
@@ -79,8 +81,8 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-ta
 
 ### Menambah video baru
 
-1. Kompres dulu ke 540x960 — **jsDelivr menolak file di atas 20 MB**, jadi video mentah
-   1080x1920 (26-42 MB) tidak akan tersaji. Perintah yang dipakai:
+1. Kompres dulu ke 540x960 — video mentah 1080x1920 (26-42 MB) terlalu berat untuk
+   dimuat di halaman. Perintah yang dipakai:
 
    ```sh
    ffmpeg -i asli.mp4 -vf "scale=540:-2:flags=lanczos" -c:v libx264 -profile:v high \
@@ -91,7 +93,7 @@ Contoh: https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/video/natal-ta
    cwebp -q 82 -m 6 /tmp/f.png -o video/poster/slug.webp
    ```
 
-2. Commit & push.
+2. Unggah `video/slug.mp4` dan `video/poster/slug.webp` ke hosting, lalu commit & push.
 3. Di `index.php`, tambah satu baris di `JJ_VIDEO`
    (cari komentar "KATALOG VIDEO UCAPAN").
 
@@ -109,9 +111,9 @@ Folder `brand/favicon/` berisi ikon tab browser (monogram JA):
 Contoh di `<head>`:
 
 ```html
-<link rel="icon" type="image/svg+xml" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon.svg">
-<link rel="icon" type="image/png" sizes="32x32" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="https://cdn.jsdelivr.net/gh/holis12821/janjiara-tema@main/brand/favicon/janjiara-favicon-180.png">
+<link rel="icon" type="image/svg+xml" href="https://janjiara.com/brand/favicon/janjiara-favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="https://janjiara.com/brand/favicon/janjiara-favicon-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://janjiara.com/brand/favicon/janjiara-favicon-180.png">
 ```
 
 ## Landing page (`index.php`)
@@ -140,8 +142,11 @@ cadangan di sana. Berkas itu **dibuat ulang otomatis** dari `index.php` oleh
 ### Catatan landing page
 
 - Tetap bisa dibuka walaupun server webinvit sedang gangguan: favicon ditanam inline
-  (data URI), gambar tema & video diambil dari repo ini lewat jsDelivr, jadi halamannya
-  mandiri dan tidak bergantung pada webinvit.
+  (data URI), gambar tema & video diambil dari hosting `janjiara.com` sendiri, jadi
+  halamannya mandiri dan tidak bergantung pada webinvit maupun CDN pihak ketiga.
+- **Saat upload ke cPanel**, sertakan folder `tema/`, `video/`, `video/poster/`,
+  `brand/` dan `assets/` di sebelah `index.php`. Tanpa folder-folder itu gambar tema
+  dan video tidak muncul (tidak ada lagi CDN sebagai cadangan).
 - Tombol pesan, katalog tema, dan pilihan paket tetap mengarah ke WhatsApp admin; menu Masuk dan preview tema tetap ke `janjiaradigital.webinvit.id`.
 - `.nojekyll` memastikan file disajikan apa adanya.
 - Membuka `index.php` dengan klik dua kali (`file://`) tidak lagi bekerja — PHP butuh

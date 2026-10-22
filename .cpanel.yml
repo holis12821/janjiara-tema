@@ -1,0 +1,44 @@
+---
+# ==========================================================================
+# JANJIARA — aturan deploy cPanel (Git Version Control)
+# --------------------------------------------------------------------------
+# Dipakai tombol "Deploy HEAD Commit" di cPanel » Git Version Control.
+#
+# Alur kerja setiap ada perubahan:
+#   1. laptop : git push
+#   2. cPanel : Git Version Control  ->  Update from Remote
+#   3. cPanel : Deploy HEAD Commit
+#
+# Hanya berkas yang memang disajikan web yang disalin ke public_html.
+# .git/, tema-src/, _arsip/, tools/, .github/ dan dokumentasi TIDAK ikut,
+# jadi repo boleh tetap besar tanpa membebani document root.
+#
+# JIKA DEPLOY GAGAL dengan pesan soal $HOME atau DEPLOYPATH kosong,
+# ganti baris DEPLOYPATH dengan jalur mutlak, contoh:
+#     - export DEPLOYPATH=/home/namauser/public_html
+# Nama user bisa dilihat di cPanel » General Information » Username.
+#
+# JIKA janjiara.com BUKAN domain utama akun ini (addon/subdomain), ganti
+# public_html dengan document root domainnya, contoh:
+#     - export DEPLOYPATH=$HOME/public_html/janjiara.com
+# Document root bisa dilihat di cPanel » Domains.
+# ==========================================================================
+deployment:
+  tasks:
+    - export DEPLOYPATH="$HOME/public_html"
+    - /bin/mkdir -p "$DEPLOYPATH"
+
+    # --- halaman + pengaturan server ---
+    - /bin/cp -f index.php index.html .htaccess "$DEPLOYPATH/"
+
+    # --- aset: gambar tema, video ucapan, poster, logo, QRIS ---
+    - /bin/cp -Rf tema video brand assets "$DEPLOYPATH/"
+
+    # --- izin baca untuk Apache ---
+    # Folder 700 / berkas 600 membuat Apache membalas 403 (penyebab QRIS
+    # tidak tampil sebelumnya), jadi dipaksa 755/644 setiap kali deploy.
+    # Mode simbolik "u+rwX,go+rX,go-w" memberi 755 untuk folder dan 644 untuk
+    # berkas dalam satu perintah (X hanya berlaku pada folder), jadi tidak perlu
+    # find — yang jalurnya berbeda-beda antar distribusi.
+    - /bin/chmod 644 "$DEPLOYPATH/index.php" "$DEPLOYPATH/index.html" "$DEPLOYPATH/.htaccess"
+    - /bin/chmod -R u+rwX,go+rX,go-w "$DEPLOYPATH/tema" "$DEPLOYPATH/video" "$DEPLOYPATH/brand" "$DEPLOYPATH/assets"
