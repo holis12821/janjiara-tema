@@ -24,6 +24,7 @@ REPO=${REPO:-/home/jank1853/repositories/janjiara-tema}
 CABANG=${CABANG:-main}
 LOG=${LOG:-$HOME/janjiara-deploy.log}
 KUNCI=${KUNCI:-$HOME/.janjiara-deploy.lock}
+CATATAN=${CATATAN:-$HOME/.janjiara-deploy-state}
 
 # Cron memberi PATH yang sangat minim. Git di server cPanel bisa ada di
 # salah satu dari dua tempat ini.
@@ -46,6 +47,11 @@ if ! mkdir "$KUNCI" 2>/dev/null; then
 fi
 trap 'rmdir "$KUNCI" 2>/dev/null' EXIT INT TERM
 
+# Sentuh berkas ini tiap kali cron jalan. Kalau berkasnya tidak pernah
+# muncul, berarti cron-nya sendiri yang tidak jalan — bukan deploy-nya
+# yang gagal. Membedakan dua hal itu tanpa akses server itu sulit sekali.
+: > "$HOME/.janjiara-cron-terakhir" 2>/dev/null
+
 cd "$REPO" 2>/dev/null || { catat "GAGAL: repo tidak ada di $REPO"; exit 1; }
 command -v git >/dev/null 2>&1 || { catat "GAGAL: perintah git tidak ditemukan"; exit 1; }
 
@@ -55,14 +61,31 @@ if ! git fetch --quiet origin "$CABANG" 2>>"$LOG"; then
   exit 1
 fi
 
-lama=$(git rev-parse HEAD 2>/dev/null)
 baru=$(git rev-parse "origin/$CABANG" 2>/dev/null)
 
-if [ "$lama" = "$baru" ]; then
-  exit 0   # tidak ada yang berubah — diam saja, jangan kotori log
+# Patokannya commit yang TERAKHIR BERHASIL dideploy, bukan HEAD repo.
+# Memakai HEAD itu bug: begitu satu deploy gagal di tengah, HEAD sudah
+# terlanjur maju ke commit baru, sehingga semua jalanan cron berikutnya
+# menyimpulkan "tidak ada yang berubah" dan tidak pernah mencoba lagi.
+# Situs bisa tertinggal rusak selamanya tanpa satu baris log pun.
+sukses=""
+[ -f "$CATATAN" ] && sukses=$(cat "$CATATAN" 2>/dev/null)
+
+# Jaring pengaman: kalau document root kehilangan berkas indeks, deploy
+# ulang walau commit-nya tidak berubah. Ini yang memulihkan situs sendiri
+# kalau deploy sebelumnya berhenti di tengah.
+docroot=$(sed -n 's/^ *- export DEPLOYPATH=//p' .cpanel.yml | head -1)
+rusak=0
+if [ -n "$docroot" ] && [ ! -f "$docroot/index.php" ]; then
+  rusak=1
+  catat "Document root tanpa index.php — deploy pemulihan dijalankan."
 fi
 
-catat "Commit baru: $(echo "$lama" | cut -c1-7) -> $(echo "$baru" | cut -c1-7)"
+if [ "$sukses" = "$baru" ] && [ "$rusak" -eq 0 ]; then
+  exit 0   # sudah mutakhir dan sehat — diam saja, jangan kotori log
+fi
+
+catat "Deploy ke $(echo "$baru" | cut -c1-7) (terakhir sukses: ${sukses:-belum pernah})"
 
 # --- ambil kode terbaru ----------------------------------------------------
 # reset --hard, bukan pull: repo di server adalah cermin GitHub, bukan
@@ -86,6 +109,7 @@ if [ -z "$tugas" ]; then
 fi
 
 if keluaran=$(printf '%s\n' "$tugas" | sh -e 2>&1); then
+  printf '%s\n' "$baru" > "$CATATAN"
   catat "BERHASIL deploy $(echo "$baru" | cut -c1-7)"
   printf '%s\n' "$keluaran" | sed 's/^/    /' >> "$LOG"
 else
