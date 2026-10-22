@@ -35,13 +35,24 @@ deployment:
     - echo "Document root ditemukan:" "$DEPLOYPATH"
 
     # --- bersihkan sisa situs lama ---------------------------------------
-    # Document root ini sebelumnya dipakai situs statis lain. Peninggalannya
-    # membuat janjiara.com selalu 404: .htaccess lama memuat aturan
-    # "hilangkan ekstensi .html" yang membelokkan /index.html -> /index -> /
-    # tanpa mengecek berkasnya ada atau tidak, lalu ErrorDocument-nya
-    # menampilkan 404.html bawaan situs itu.
+    # KOREKSI (22 Okt 2026): komentar di sini sebelumnya menuduh .htaccess
+    # situs statis lama sebagai penyebab janjiara.com selalu 404. ITU SALAH.
+    # Penyebab sebenarnya: ada deploy aplikasi Node.js (category: static,
+    # node:22, "serving the files as-is") yang terpasang untuk domain ini
+    # dan merebut SELURUH permintaan, sehingga Apache, .htaccess dan PHP
+    # tidak pernah kebagian. Buktinya: halaman 404 yang sama persis
+    # (utf-8, 1641 B) dibalas untuk semua jalur termasuk /cgi-bin/ dan
+    # /.well-known/, untuk semua metode (GET/POST/PUT/OPTIONS), dan
+    # /index.html dibelokkan ke /index -- itu "clean URLs" bawaan static
+    # server Node, bukan aturan .htaccess.
     #
-    # Hanya berkas yang bentrok yang dihapus. cgi-bin/ dan .well-known/
+    # Deploy ini TIDAK akan menyelesaikan 404 selama aplikasi Node.js itu
+    # masih aktif. Matikan/hapus dulu dari panel hosting, baru deploy.
+    # Lihat bagian "Hosting: PHP via cPanel, BUKAN Node.js" di README.md.
+    #
+    # Perintah rm di bawah tetap berguna: menyingkirkan berkas bentrok yang
+    # mungkin tertinggal di document root dari percobaan sebelumnya.
+    # cgi-bin/ dan .well-known/
     # (dipakai AutoSSL untuk memperbarui sertifikat) sengaja TIDAK disentuh,
     # begitu juga subfolder lain milik Anda.
     - /bin/rm -f "$DEPLOYPATH/.htaccess" "$DEPLOYPATH/index.html" "$DEPLOYPATH/index.htm" "$DEPLOYPATH/index.php" "$DEPLOYPATH/404.html" "$DEPLOYPATH/403.html" "$DEPLOYPATH/500.html"

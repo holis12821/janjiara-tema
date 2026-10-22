@@ -154,3 +154,60 @@ cadangan di sana. Berkas itu **dibuat ulang otomatis** dari `index.php` oleh
   <http://localhost:8000/>.
 
 Aktifkan sekali: **Settings → Pages → Build and deployment → Source: Deploy from a branch → Branch: `main` / `(root)` → Save.**
+
+
+
+## Hosting: PHP via cPanel, BUKAN Node.js
+
+**janjiara.com harus disajikan Apache + PHP, bukan static server Node.js.**
+
+Pernah ada deploy aplikasi Node.js terpasang untuk domain ini, dengan log seperti:
+
+```
+Deploying "janjiara-tema" (category: static, image: docker.io/library/node:22).
+Pulling the latest source.
+No dependency manifest; skipping the build and serving the files as-is.
+Applying the current configuration and starting the application.
+```
+
+Itu **penyebab janjiara.com selalu 404**, bukan sisa `.htaccess` situs lama seperti
+yang sempat dicatat keliru di `.cpanel.yml`. Aplikasi Node itu merebut seluruh
+permintaan ke domain, sehingga Apache, `.htaccess` dan PHP tidak pernah kebagian.
+
+Cara mengenalinya dari luar (semua terukur 22 Okt 2026):
+
+| Gejala | Artinya |
+|---|---|
+| Halaman 404 identik (utf-8, 1641 B) untuk **semua** jalur, termasuk `/cgi-bin/` dan `/.well-known/` | satu proses aplikasi menelan semua permintaan |
+| 404 yang sama untuk `GET`, `POST`, `PUT`, `OPTIONS` | bukan Apache yang melayani folder |
+| `/index.html` → 301 `/index` → 301 `/` | *clean URLs* bawaan static server Node |
+| Halaman galat bergaya Vercel `serve` | paket static server Node yang umum |
+
+Bandingkan: Apache yang melayani folder membalas galat `iso-8859-1` dan
+memperlakukan `/cgi-bin/` serta metode non-GET secara berbeda.
+
+### Kenapa Node.js tidak bisa dipakai di sini
+
+- **Static server Node tidak bisa menjalankan PHP.** Tidak ada setting untuk itu.
+  `index.php` akan dikirim sebagai **teks biasa** — seluruh kode sumber terbaca publik.
+- **`.htaccess` diabaikan sepenuhnya.** Rute `/favicon.ico` dan `/apple-touch-icon.png`,
+  `Options -MultiViews`, header keamanan, blokir `README.txt`, dan cache 30 hari
+  semuanya mati.
+- **Blok PHP penanda intro amplop** (session + cookie di bagian atas `index.php`)
+  tidak jalan.
+
+### Yang harus dilakukan
+
+1. Di panel hosting, **hapus atau hentikan** aplikasi/deploy Node.js untuk
+   `janjiara.com`. Selama masih aktif, deploy cPanel tidak akan mengubah apa pun
+   yang terlihat di browser.
+2. Pastikan domain kembali disajikan dari document root Apache
+   (`/home/jank1853/public_html`), bukan dari aplikasi.
+3. Baru jalankan **Git Version Control → Update from Remote → Deploy HEAD Commit**.
+4. Log deploy harus memuat `Document root ditemukan: /home/jank1853/public_html`.
+   Bila deploy gagal sebelum baris itu, jalurnya salah — ambil jalur yang benar dari
+   cPanel » Domains, kolom *Document Root*, lalu ubah `DEPLOYPATH` di `.cpanel.yml`.
+
+Setelah itu, penanda bahwa PHP benar-benar jalan: `https://janjiara.com/favicon.ico`
+membalas `200 image/x-icon` (aturan dari `.htaccess`), dan `https://janjiara.com/index`
+membalas `404` — bukan dibelokkan ke `/`.
