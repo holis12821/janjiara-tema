@@ -5172,13 +5172,16 @@ const JJ_PROMO = {
    - Setelah form terkirim: pilih metode bayar, salin nomor/nominal, QRIS, lalu kirim bukti ke WhatsApp admin
    ===================================================================== */
 /* REKENING & E-WALLET — satu-satunya tempat mengubah nomor tujuan pembayaran.
-   Logo resmi (opsional): taruh file assets/pay/<id>.svg lalu tambahkan  logo: true  pada baris metodenya; tanpa itu tampil lencana nama. */
+   Logo resmi (opsional): taruh berkasnya di assets/pay/ lalu tulis NAMA BERKAS LENGKAP
+   dengan ekstensinya pada  logo:  — mis.  logo: "bca.webp"  atau  logo: "gopay.svg".
+   Ekstensi sengaja tidak ditebak: tiap penyedia membagikan format yang berbeda.
+   Tanpa  logo:  (atau bila berkasnya gagal dimuat) tampil lencana nama berwarna. */
 const JJ_BAYAR = [
-  { id: "bca",       nama: "BCA",            jenis: "Transfer bank", nomor: "5530643664",   an: "NURCHOLIS", warna: "#0b5ea8" },
-  { id: "jago",      nama: "Bank Jago",      jenis: "Transfer bank", nomor: "508285297189", an: "NURCHOLIS", warna: "#f2a100", ink: "#292A26" },
-  { id: "dana",      nama: "DANA",           jenis: "E-wallet",      nomor: "08998038513",  an: "NURCHOLIS", warna: "#108ee9" },
-  { id: "gopay",     nama: "GoPay",          jenis: "E-wallet",      nomor: "085121024405", an: "NURCHOLIS", warna: "#00a2c7" },
-  { id: "shopeepay", nama: "ShopeePay",      jenis: "E-wallet",      nomor: "085110562033", an: "NURCHOLIS", warna: "#ee4d2d" },
+  { id: "bca",       nama: "BCA",            jenis: "Transfer bank", nomor: "5530643664",   an: "NURCHOLIS", warna: "#0b5ea8", logo: "bca.webp" },
+  { id: "jago",      nama: "Bank Jago",      jenis: "Transfer bank", nomor: "508285297189", an: "NURCHOLIS", warna: "#f2a100", ink: "#292A26", logo: "jago.webp" },
+  { id: "dana",      nama: "DANA",           jenis: "E-wallet",      nomor: "08998038513",  an: "NURCHOLIS", warna: "#108ee9", logo: "dana.webp" },
+  { id: "gopay",     nama: "GoPay",          jenis: "E-wallet",      nomor: "085121024405", an: "NURCHOLIS", warna: "#00a2c7", logo: "gopay.svg" },
+  { id: "shopeepay", nama: "ShopeePay",      jenis: "E-wallet",      nomor: "085110562033", an: "NURCHOLIS", warna: "#ee4d2d", logo: "shopeepay.webp" },
   { id: "qris",      nama: "QRIS",           jenis: "Scan dari bank & e-wallet apa pun", qr: JJ_CDN + "assets/qris-shopeepay.png", an: "NURCHOLIS", warna: "#2F3429" },
   { id: "qris-toko", nama: "QRIS JANJIARA",  jenis: "Segera hadir", soon: true, warna: "#C6A66B", ink: "#292A26" }
 ];
@@ -5332,12 +5335,30 @@ const JJ_BAYAR = [
   let pilih = null, lastBill = null;
 
   function logo(m) {
-    return '<span class="pay-logo" style="--pay:' + m.warna + ";--pay-ink:" + (m.ink || "#fff") + '">' + (m.logo ? '<img src="' + JJ_CDN + 'assets/pay/' + m.id + '.svg" alt="" onerror="this.remove()">' : '') + '<span>' + esc(m.nama) + "</span></span>";
+    /* alt="" disengaja: nama metodenya sudah ditulis di <span> sebelahnya, jadi
+       pembaca layar tidak perlu mendengarnya dua kali. */
+    return '<span class="pay-logo" style="--pay:' + m.warna + ";--pay-ink:" + (m.ink || "#fff") + '">' +
+      (m.logo ? '<img src="' + JJ_CDN + 'assets/pay/' + m.logo + '" alt="" decoding="async" data-pay-logo>' : '') +
+      '<span>' + esc(m.nama) + "</span></span>";
+  }
+  /* Jaring pengaman logo, sama pola dengan QRIS di bawah: penangan error global
+     sudah mencoba berkas lokal lebih dulu (menandai data-lokal), jadi kegagalan
+     KEDUA berarti URL penuh dan berkas lokal sama-sama tidak terbaca. Logonya
+     dibuang supaya lencana nama berwarna yang tampil, bukan ikon gambar rusak. */
+  function jagaLogo(root) {
+    qa("img[data-pay-logo]", root).forEach(function (im) {
+      let gagal = 0;
+      im.addEventListener("error", function () {
+        if (im.dataset.lokal && ++gagal < 2) return;
+        im.remove();
+      });
+    });
   }
   grid.innerHTML = JJ_BAYAR.map(function (m, i) {
     return '<button type="button" class="pay-opt' + (m.soon ? " is-soon" : "") + '" role="radio" aria-checked="false" data-id="' + m.id + '"' + (m.soon ? ' aria-disabled="true"' : "") + ' style="--i:' + i + '">' +
       logo(m) + '<span class="pay-opt__type">' + esc(m.jenis) + "</span>" + (m.soon ? '<span class="pay-opt__soon">Segera hadir</span>' : "") + "</button>";
   }).join("");
+  jagaLogo(grid);
 
   function fmtNo(n) { return n.length > 10 ? n.replace(/(\d{4})(?=\d)/g, "$1 ") : n.replace(/(\d{3,4})(?=(\d{3})+$)/g, "$1 "); }
   async function copyText(t, btn, okLabel) {
@@ -5363,6 +5384,7 @@ const JJ_BAYAR = [
         (m.jenis === "E-wallet" ? '<p class="pay-tip">Kirim lewat aplikasi ' + esc(m.nama) + ' ke nomor di atas, atau transfer dari m-banking memakai menu top up/transfer ' + esc(m.nama) + ".</p>" : '<p class="pay-tip">Transfer tepat ' + rp(lastBill ? lastBill.now : 0) + " agar admin mudah mencocokkan pembayaranmu.</p>");
     }
     detail.innerHTML = body;
+    jagaLogo(detail);
     detail.hidden = false;
     if (!reduce) { detail.classList.remove("is-in"); void detail.offsetWidth; detail.classList.add("is-in"); }
     doneBtn.removeAttribute("aria-disabled");

@@ -78,5 +78,6 @@ deployment:
     - test -f "$DEPLOYPATH/.htaccess"
     - test -f "$DEPLOYPATH/tema/adat-jawa.webp"
     - test -f "$DEPLOYPATH/assets/qris-shopeepay.png"
+    - test -f "$DEPLOYPATH/assets/pay/bca.webp"
     - test -f "$DEPLOYPATH/video/poster/natal-tahun-baru-001.webp"
     - echo "Deploy JANJIARA selesai. Document root:" "$DEPLOYPATH"
