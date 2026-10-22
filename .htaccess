@@ -1,13 +1,38 @@
 # ==========================================================================
 # JANJIARA — pengaturan server (Apache / LiteSpeed di cPanel)
+# --------------------------------------------------------------------------
+# Berkas ini disalin ke document root oleh .cpanel.yml dan MENGGANTI seluruh
+# .htaccess yang ada di sana. Itu penting: document root ini sebelumnya
+# dipakai situs statis lain, dan .htaccess peninggalannya membuat
+# janjiara.com selalu 404 (aturan "hilangkan ekstensi .html" membelokkan
+# /index.html -> /index -> / tanpa mengecek berkasnya ada atau tidak).
+#
+# Yang dideploy ke document root hanyalah:
+#   index.php index.html .htaccess  +  tema/ video/ brand/ assets/
+# Jadi aturan di bawah hanya perlu memikirkan berkas-berkas itu.
 # ==========================================================================
-DirectoryIndex index.php index.html
-Options -Indexes
 
-# Paksa HTTPS (aktif setelah SSL/AutoSSL terpasang).
-# Dua kondisi ini mencegah "too many redirects" bila memakai Cloudflare/proxy.
+# index.php yang disajikan; index.html hanya cadangan bila PHP mati.
+DirectoryIndex index.php index.html
+
+# -Indexes   : folder tanpa index tidak menampilkan daftar berkas.
+# -MultiViews: mencegah Apache menebak "/index" -> "/index.php" sendiri.
+#              Tanpa ini, URL tanpa ekstensi bisa berperilaku seperti situs
+#              lama dan menyulitkan pelacakan masalah 404.
+Options -Indexes -MultiViews
+
+# Pakai halaman galat bawaan Apache, bukan ErrorDocument warisan.
+# Situs lama menunjuk ke 404.html miliknya sendiri; baris ini memastikan
+# berkas itu tidak terpakai lagi walau sempat tertinggal di server.
+ErrorDocument 404 default
+ErrorDocument 403 default
+ErrorDocument 500 default
+
 <IfModule mod_rewrite.c>
   RewriteEngine On
+
+  # --- Paksa HTTPS (aktif setelah SSL/AutoSSL terpasang) -----------------
+  # Dua kondisi ini mencegah "too many redirects" bila memakai Cloudflare/proxy.
   RewriteCond %{HTTPS} off
   RewriteCond %{HTTP:X-Forwarded-Proto} !https
   RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
@@ -15,37 +40,85 @@ Options -Indexes
   # Opsional: www -> tanpa www. Hapus tanda # di dua baris berikut bila ingin.
   # RewriteCond %{HTTP_HOST} ^www\.(.+)$ [NC]
   # RewriteRule ^ https://%1%{REQUEST_URI} [L,R=301]
+
+  # --- Ikon situs --------------------------------------------------------
+  # index.php menanam ikon SVG langsung di HTML (data URI), tapi browser dan
+  # perayap tetap meminta /favicon.ico dan /apple-touch-icon.png di akar.
+  # Tanpa aturan ini keduanya 404, dan browser memakai favicon lama yang
+  # masih tersimpan di cache-nya untuk domain ini (favicon situs sebelumnya).
+  # Berkasnya sudah ada di brand/favicon/, jadi cukup diarahkan ke sana.
+  # Ini rewrite internal (tanpa R=301) supaya alamatnya tetap /favicon.ico
+  # dan tidak ada redirect permanen baru yang ikut tersimpan di browser.
+  RewriteRule ^favicon\.ico$                        brand/favicon/favicon.ico [L]
+  RewriteRule ^apple-touch-icon(-precomposed)?\.png$ brand/favicon/janjiara-favicon-180.png [L]
 </IfModule>
 
-# Jangan tampilkan file internal.
-# Berkas-berkas ini kadang ikut terbawa ke document root (mis. bila repo di-clone
-# langsung ke public_html, atau ikut tersalin saat upload manual). Isinya untuk
-# pengembang, bukan pengunjung, jadi diblokir agar tidak bisa diunduh siapa pun:
-#   README.md / PANDUAN*.md  catatan internal
-#   .gitignore               daftar berkas yang sengaja tidak masuk repo
-#   .nojekyll                penanda khusus GitHub Pages
-#   .DS_Store                berkas sampah macOS, memuat daftar nama berkas
-#   .cpanel.yml              resep deploy cPanel, memuat jalur folder server
-<FilesMatch "^(README\.md|PANDUAN.*\.md|\.gitignore|\.nojekyll|\.DS_Store|\.cpanel\.yml)$">
+# ==========================================================================
+# Berkas internal — jangan sampai bisa diunduh publik
+# ==========================================================================
+# assets/pay/README.txt IKUT terdeploy (karena seluruh assets/ disalin) dan
+# isinya catatan untuk pengembang, bukan untuk pengunjung.
+<FilesMatch "^README\.(txt|md)$|^PANDUAN.*\.md$">
   Require all denied
 </FilesMatch>
+
+# Berkas berikut tidak ada dalam daftar deploy, tapi bisa tertinggal di
+# document root bila repo pernah di-clone langsung ke public_html atau ada
+# upload manual. Diblokir sebagai pengaman:
+#   .gitignore  daftar berkas yang sengaja tidak masuk repo
+#   .nojekyll   penanda khusus GitHub Pages
+#   .DS_Store   berkas sampah macOS, memuat daftar nama berkas
+#   .cpanel.yml resep deploy cPanel, memuat jalur folder server
+#   htaccess    berkas ini tanpa titik. Tidak ada di repo (sudah dihapus) dan
+#               tidak pernah disalin oleh .cpanel.yml, tapi tetap diblokir:
+#               bila suatu saat tersalin manual ke server, isinya terbaca
+#               sebagai teks biasa dan membocorkan seluruh aturan server.
+<FilesMatch "^(\.gitignore|\.nojekyll|\.DS_Store|\.cpanel\.yml|htaccess)$">
+  Require all denied
+</FilesMatch>
+
+# Tutup seluruh isi .git/ bila folder itu pernah ikut tersalin.
 RedirectMatch 404 /\.git
 
-# Cache gambar & video supaya halaman cepat dibuka ulang
+# ==========================================================================
+# Kecepatan
+# ==========================================================================
+# Aset bernama tetap (tema/, video/, brand/, assets/) boleh disimpan lama.
+# HTML tidak boleh di-cache: index.php dirender ulang setiap kunjungan dan
+# harga/paket di dalamnya bisa berubah kapan saja.
 <IfModule mod_expires.c>
   ExpiresActive On
-  ExpiresByType image/webp "access plus 30 days"
-  ExpiresByType image/png "access plus 30 days"
-  ExpiresByType image/jpeg "access plus 30 days"
-  ExpiresByType image/svg+xml "access plus 30 days"
-  ExpiresByType video/mp4 "access plus 30 days"
-  ExpiresByType text/html "access plus 0 seconds"
+  ExpiresByType image/webp        "access plus 30 days"
+  ExpiresByType image/png         "access plus 30 days"
+  ExpiresByType image/jpeg        "access plus 30 days"
+  ExpiresByType image/svg+xml     "access plus 30 days"
+  ExpiresByType image/x-icon      "access plus 30 days"
+  ExpiresByType video/mp4         "access plus 30 days"
+  ExpiresByType text/html         "access plus 0 seconds"
 </IfModule>
 
-# Kompres HTML/CSS/JS
+# Kompres teks. Gambar webp/png dan video mp4 sudah terkompresi —
+# memasukkannya ke DEFLATE hanya memboroskan CPU tanpa memperkecil ukuran.
 <IfModule mod_deflate.c>
-  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml
+  AddOutputFilterByType DEFLATE text/html text/css text/plain
+  AddOutputFilterByType DEFLATE application/javascript application/json
+  AddOutputFilterByType DEFLATE image/svg+xml
 </IfModule>
 
-AddType image/webp .webp
-AddType video/mp4 .mp4
+<IfModule mod_headers.c>
+  # Jangan biarkan browser menebak-nebak tipe berkas.
+  Header always set X-Content-Type-Options "nosniff"
+  # Halaman tidak untuk dipasang di iframe situs lain.
+  Header always set X-Frame-Options "SAMEORIGIN"
+  # Kirim alamat rujukan hanya ke domain sendiri.
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  # Pastikan HTML selalu diambil baru, bahkan lewat proxy.
+  <FilesMatch "\.(php|html)$">
+    Header set Cache-Control "no-cache, must-revalidate"
+  </FilesMatch>
+</IfModule>
+
+# Tipe berkas yang dipakai halaman ini, bila server belum mengenalinya.
+AddType image/webp  .webp
+AddType image/x-icon .ico
+AddType video/mp4   .mp4

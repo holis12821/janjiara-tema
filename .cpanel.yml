@@ -12,17 +12,27 @@
 # Hanya berkas yang memang disajikan web yang disalin ke document root.
 # .git/, tema-src/, _arsip/, tools/, .github/ dan dokumentasi TIDAK ikut.
 #
-# JIKA DEPLOY GAGAL dengan pesan soal $HOME atau DEPLOYPATH kosong,
-# ganti baris DEPLOYPATH dengan jalur mutlak:
-#     - export DEPLOYPATH=/home/jank1853/public_html
-#
 # JIKA DOCUMENT ROOT BERPINDAH, ubah satu baris DEPLOYPATH di bawah.
 # Jalurnya bisa dilihat di cPanel » Domains, kolom Document Root.
 # ==========================================================================
 deployment:
   tasks:
-    - export DEPLOYPATH="$HOME/public_html"
-    - /bin/mkdir -p "$DEPLOYPATH"
+    # Document root janjiara.com. Ditulis sebagai jalur mutlak, BUKAN
+    # "$HOME/public_html": di lingkungan deploy cPanel $HOME tidak selalu
+    # terisi, dan bila kosong jalurnya berubah menjadi "/public_html" —
+    # folder yang sama sekali lain.
+    - export DEPLOYPATH=/home/jank1853/public_html
+
+    # Document root WAJIB sudah ada — cPanel yang membuatnya saat domain
+    # didaftarkan. Jadi di sini hanya diperiksa, TIDAK dibuat.
+    #
+    # Dulu baris ini "mkdir -p $DEPLOYPATH". Itu berbahaya: kalau DEPLOYPATH
+    # salah, mkdir justru MEMBUAT folder itu, semua perintah copy di bawah
+    # sukses, log deploy bersih — padahal web menyajikan folder lain dan
+    # situsnya tetap 404. Persis gejala yang sulit dilacak itu.
+    # Dengan test -d, DEPLOYPATH yang salah langsung menggagalkan deploy.
+    - test -d "$DEPLOYPATH"
+    - echo "Document root ditemukan:" "$DEPLOYPATH"
 
     # --- bersihkan sisa situs lama ---------------------------------------
     # Document root ini sebelumnya dipakai situs statis lain. Peninggalannya
