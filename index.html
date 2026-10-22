@@ -1564,6 +1564,63 @@ body.has-sheet .wa-float { opacity: 0; pointer-events: none; }
 }
 @media print { .jj-bnav { display: none !important; } }
 .no-js .jj-bnav { transform: none; opacity: 1; }
+
+/* ---------- 29. v10 (22 Okt 2026): Form Order dirapikan untuk layar kecil ----------
+   Tiga bagian yang paling berantakan di HP diperbaiki di sini:
+   1. Judul bagian (legend). Keterangan dalam kurung — "(Cerita & Purnama)",
+      "(opsional)" — ikut di baris judul sebagai item flex, jadi judulnya
+      terdesak menjadi kolom sempit dua baris. Sekarang keterangannya selalu
+      turun ke barisnya sendiri di bawah judul.
+   2. Pemilih musik (Judul lagu / Link YouTube / Tanpa musik). Dulu label dan
+      ketiga pilihan satu arus flex, sehingga di lebar 360–430px pecah jadi
+      "label + 1 pilihan" lalu "2 pilihan" — ragged. Sekarang grid: label di
+      satu baris, pilihan berderet di bawahnya, menumpuk rapi di HP.
+   3. Tombol "Tambah …". Keterangan kecil di dalam pil tombol berdesakan
+      dengan teksnya. Di HP tombol dibuat selebar kartu dan keterangannya
+      pindah ke baris kedua.
+   Ikut dirapikan: opsi custom tema, kartu add-on (harga pindah ke bawah),
+   dan baris amplop digital. */
+.order-card legend { flex-wrap: wrap; row-gap: 4px; line-height: 1.25; }
+.order-card legend small { flex-basis: 100%; padding-left: 46px; margin-top: -2px; }
+
+.music-pick { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px 16px; }
+.music-pick .field__label { margin: 0; }
+.music-pick__opts { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.music-pick .field, .music-pick .order-hint { grid-column: 1 / -1; margin: 0; }
+
+.btn-add { flex-wrap: wrap; row-gap: 2px; text-align: left; }
+
+@media (max-width: 760px) {
+  .order-card legend { font-size: 1.34rem; gap: 10px; }
+  .order-card legend small { padding-left: 44px; }
+  .music-pick { grid-template-columns: minmax(0, 1fr); }
+  .music-pick__opts { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+  .music-pick .check--inline { margin: 0; }
+  .btn-add { display: flex; width: 100%; padding: 12px 18px; }
+  .btn-add small { flex-basis: 100%; padding-left: 28px; }
+  .opt-row { gap: 12px; }
+  .opt-row .check--inline { flex: 1 1 100%; }
+  .addon-pick > span { grid-template-columns: minmax(0, 1fr); gap: 2px; padding: 14px 16px 14px 46px; }
+  .addon-pick small, .addon-pick em { grid-column: 1; }
+  .addon-pick em { grid-row: auto; justify-self: start; margin-top: 4px; font-size: 1rem; }
+  .dyn-item { padding: 14px; }
+}
+
+/* Pita "draf dipulihkan" di atas Form Order */
+.order-draft {
+  display: flex; align-items: center; flex-wrap: wrap; gap: 8px 12px; margin: 0;
+  padding: 12px 16px; border-radius: var(--radius); border: 1px solid var(--olive-200);
+  background: var(--olive-50); color: var(--olive-800); font-size: .88rem; line-height: 1.5;
+}
+.order-draft[hidden] { display: none; }
+.order-draft svg { width: 18px; height: 18px; flex: none; }
+.order-draft span { flex: 1 1 180px; min-width: 0; }
+.order-draft button {
+  flex: none; border: 1px solid var(--olive-500); background: transparent; color: var(--olive-800);
+  font: 500 .84rem var(--font-sans); padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  transition: background-color .2s var(--ease);
+}
+.order-draft button:hover { background: var(--olive-100); }
 </style>
 </head>
 <body>
@@ -2584,6 +2641,13 @@ body.has-sheet .wa-float { opacity: 0; pointer-events: none; }
   <section class="order-body">
     <div class="container order-layout">
       <form class="order-form" id="order-form" novalidate>
+        <!-- Muncul sendiri bila ada isian tersimpan di perangkat ini (lihat blok "draf otomatis") -->
+        <p class="order-draft" id="order-draft" role="status" hidden>
+          <svg aria-hidden="true"><use href="#i-check"/></svg>
+          <span>Isian terakhirmu dipulihkan otomatis, jadi tidak perlu mengetik ulang. Tersimpan di perangkat ini saja.</span>
+          <button type="button" class="js-draft-clear">Kosongkan form</button>
+        </p>
+
         <!-- =============== 1. MOMEN =============== -->
         <fieldset class="order-card">
           <legend><b>1</b>Momen yang dirayakan</legend>
@@ -2754,9 +2818,11 @@ body.has-sheet .wa-float { opacity: 0; pointer-events: none; }
           <p class="order-hint">Dimasukkan bila tema yang dipilih menyediakan bagiannya. Boleh dikosongkan.</p>
           <div class="music-pick">
             <span class="field__label">Musik undangan</span>
-            <label class="check check--inline"><input type="radio" name="musik_mode" value="Judul lagu" data-label="Musik"><span>Judul lagu</span></label>
-            <label class="check check--inline"><input type="radio" name="musik_mode" value="Link YouTube" data-label="Musik"><span>Link YouTube</span></label>
-            <label class="check check--inline"><input type="radio" name="musik_mode" value="Tanpa musik" data-label="Musik"><span>Tanpa musik</span></label>
+            <div class="music-pick__opts">
+              <label class="check check--inline"><input type="radio" name="musik_mode" value="Judul lagu" data-label="Musik"><span>Judul lagu</span></label>
+              <label class="check check--inline"><input type="radio" name="musik_mode" value="Link YouTube" data-label="Musik"><span>Link YouTube</span></label>
+              <label class="check check--inline"><input type="radio" name="musik_mode" value="Tanpa musik" data-label="Musik"><span>Tanpa musik</span></label>
+            </div>
             <label class="field field--full js-musik-detail" hidden><span class="js-musik-label">Judul lagu</span><input name="musik" type="text" placeholder="Contoh: A Thousand Years (instrumental)" data-label="Lagu / link"></label>
             <p class="order-hint js-musik-janji" hidden>Paket Janji memakai musik bawaan tema. Ingin lagu pilihan sendiri? Centang add-on <b>Musik custom</b> di bagian 9.</p>
           </div>
