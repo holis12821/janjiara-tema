@@ -10,3 +10,8 @@ JANJIARA_Perhitungan_HPP*
 JANJIARA_Prompt_Update_Landing_Page*
 JANJIARA_Checkout_Redirect_Product_ID.md
 *.pdf
+
+# Zip siap-upload hasil tools/buat-zip-upload.sh — berkas hasil, bukan sumber.
+# Normalnya ditaruh di luar repo, tapi diabaikan juga di sini untuk amannya.
+janjiara-upload-*.zip
+*.zip
